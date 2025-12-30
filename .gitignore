@@ -1,0 +1,81 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+lib/**/*.js
+lib/**/*.d.ts
+lib/**/*.d.ts.map
+lib/**/*.js.map
+
+# Example build outputs
+examples/*/dist/
+examples/*/node_modules/
+
+# Source directory build artifacts (when using --outdir src)
+**/src/**/*.js
+**/src/**/*.mjs
+**/src/**/*.d.ts
+**/src/**/*.js.map
+**/src/**/*.mjs.map
+**/src/**/*.d.ts.map
+
+# TypeScript
+*.tsbuildinfo
+.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pnpm-debug.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+.temp/
+
+# Package manager
+.npm
+.yarn/
+.pnpm-store/
+
+# Misc
+*.orig
+*.rej

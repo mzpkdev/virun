@@ -1,0 +1,15 @@
+{
+  "name": "browser-app",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "virun serve --target browser --entry index.html",
+    "build": "virun build --target browser --entry index.html",
+    "test": "virun test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "virun": "file:../.."
+  }
+}
+

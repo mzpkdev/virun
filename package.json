@@ -1,0 +1,50 @@
+{
+  "name": "virun",
+  "version": "0.0.0",
+  "description": "Opinionated Vite-powered workflow tool",
+  "type": "module",
+  "main": "./lib/main.js",
+  "types": "./lib/main.d.ts",
+  "bin": {
+    "virun": "bin/run"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "tsc --build --clean",
+    "preprepare": "ts-patch install",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "cmdore": "^0.0.7",
+    "vite": "^5.1.0",
+    "vite-plugin-dts": "^3.0.1",
+    "vitest": "^1.6.0",
+    "jsdom": "^24.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.4.0",
+    "ts-patch": "^3.2.1",
+    "typescript": "^5.5.4",
+    "typescript-transform-paths": "^3.4.11"
+  },
+  "author": "Mateusz Pietrzak",
+  "license": "MIT",
+  "homepage": "https://github.com/mzpkdev/virun#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mzpkdev/virun.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mzpkdev/virun/issues"
+  },
+  "files": [
+    "bin/",
+    "lib/**/*.js",
+    "lib/**/*.js.map",
+    "lib/**/*.d.ts",
+    "lib/**/*.d.ts.map",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": ["vite", "cli", "build-tool"]
+}

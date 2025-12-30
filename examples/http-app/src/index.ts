@@ -1,0 +1,35 @@
+import { createServer } from "node:http"
+import { getConfig } from "./config.js"
+import { formatDate, getGreeting } from "./utils.js"
+import { log, logError } from "./logger.js"
+import { createCorsHandler } from "./middleware/cors.js"
+import { handleApiRequest, handleHealthCheck } from "./routes/api.js"
+
+
+const { port: PORT, host: HOST } = getConfig()
+
+const cors = createCorsHandler({ origin: "*", methods: ["GET", "POST"] })
+
+const server = createServer((req, res) => {
+    cors(req, res, () => {
+        if (req.url === "/health") {
+            handleHealthCheck(req, res)
+        } else if (req.url?.startsWith("/api")) {
+            handleApiRequest(req, res)
+        } else {
+            res.writeHead(200, { "Content-Type": "application/json" })
+            res.end(JSON.stringify({
+                message: `${getGreeting()} from HTTP app!`,
+                timestamp: formatDate(new Date()),
+                url: req.url,
+                method: req.method
+            }))
+        }
+    })
+})
+
+server.listen(PORT, HOST, () => {
+    log(`🚀 Server running at http://${HOST}:${PORT}`)
+    log(`📅 Started at ${formatDate(new Date())}`)
+})
+
