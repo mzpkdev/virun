@@ -5,9 +5,18 @@ node_modules/
 
 # Build outputs
 lib/**/*.js
+lib/**/*.mjs
 lib/**/*.d.ts
 lib/**/*.d.ts.map
 lib/**/*.js.map
+lib/**/*.mjs.map
+lib/**/_virtual/
+lib/**/*2.js
+lib/**/*2.mjs
+lib/**/*2.js.map
+lib/**/*2.mjs.map
+lib/**/*2.d.ts
+lib/**/*2.d.ts.map
 
 # Example build outputs
 examples/*/dist/

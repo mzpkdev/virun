@@ -6,7 +6,7 @@ export default defineOption({
     name: "ui",
     description: "Start Vitest UI",
     required: false,
-    defaultValue: () => configuration?.test?.ui ?? false,
+    defaultValue: () => configuration()?.test?.ui ?? false,
     parse: (value?: string): boolean => {
         // Boolean flag: if present (even with empty value), return true
         if (value === undefined || value === "" || value === "true") {

@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "virun serve --target node --entry src/index.ts",
     "build": "virun build --target node --entry src/index.ts --module esm cjs",
+    "build:virun": "virun build --target node --entry src/index.ts --module esm cjs",
     "build:esm": "virun build --target node --entry src/index.ts --module esm",
     "build:cjs": "virun build --target node --entry src/index.ts --module cjs",
     "build:preserve-modules": "virun build --target node --preserve-modules --module esm cjs --outdir src",

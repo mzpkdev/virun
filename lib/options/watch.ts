@@ -7,7 +7,7 @@ export default defineOption({
     alias: "w",
     description: "Run tests in watch mode",
     required: false,
-    defaultValue: () => configuration?.test?.watch ?? false,
+    defaultValue: () => configuration()?.test?.watch ?? false,
     parse: (value?: string): boolean => {
         // Boolean flag: if present (even with empty value), return true
         if (value === undefined || value === "" || value === "true") {

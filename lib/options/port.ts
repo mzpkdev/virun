@@ -7,7 +7,7 @@ export default defineOption({
     alias: "p",
     description: "Dev server port",
     required: false,
-    defaultValue: () => configuration?.port ?? 5173,
+    defaultValue: () => configuration()?.port ?? 5173,
     parse: (value: string): number => {
         const port = parseInt(value, 10)
         if (isNaN(port) || port < 1 || port > 65535) {

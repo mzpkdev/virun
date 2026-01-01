@@ -6,7 +6,7 @@ export default defineOption({
     alias: "p",
     description: "Build each file separately (library mode, like tsc)",
     required: false,
-    defaultValue: () => configuration?.preserveModules ?? false,
+    defaultValue: () => configuration()?.preserveModules ?? false,
     parse: (value?: string): boolean => {
         // Handle --preserve-modules (no value) and --preserve-modules=true/false
         if (value === undefined) return true

@@ -1,10 +1,31 @@
 import { builtinModules } from "node:module"
 import path from "node:path"
-import { createServer, createViteRuntime, UserConfig, ViteDevServer } from "vite"
+import { createServer, createViteRuntime, UserConfig, ViteDevServer, Plugin } from "vite"
 import type { Configuration, Target } from "./configuration.js"
 import { build as viteBuild } from "vite"
 import { findTypeScriptFiles, resolveSourceDirectory } from "../utils/files.js"
 
+
+function createEsbuildNodePlugin(): Plugin {
+    return {
+        name: "esbuild-node-target",
+        config(config) {
+            // Configure esbuild to support Node.js features like top-level await
+            if (!config.esbuild) {
+                config.esbuild = {}
+            }
+            config.esbuild.target = "node18"
+            config.esbuild.platform = "node"
+        },
+        configResolved(config) {
+            // Ensure esbuild is configured for Node.js
+            if (config.esbuild) {
+                config.esbuild.target = "node18"
+                config.esbuild.platform = "node"
+            }
+        }
+    }
+}
 
 async function addDtsPlugin(target: Target, viteConfig: UserConfig, config: Configuration): Promise<void> {
     const isNode = target === "node"
@@ -139,13 +160,29 @@ const buildViteNodeConfiguration = async (config: Configuration): Promise<UserCo
     const vite: UserConfig = {
         root,
         logLevel: "info",
-        plugins: [],
+        plugins: preserveModules ? [createEsbuildNodePlugin()] : [],
+        ...(preserveModules && {
+            esbuild: {
+                target: "node18",
+                platform: "node"
+            }
+        }),
         build: {
             outDir: path.resolve(root!, outdir!),
             emptyOutDir: !isOutputInSource,  // Don't delete source files
             sourcemap: true,
             // Disable minification when preserveModules is enabled (library mode)
             minify: preserveModules ? false : "esbuild",
+            // Set target to support top-level await when preserveModules is enabled
+            target: preserveModules ? ["node18"] : undefined,
+            // Configure esbuild to support top-level await
+            ...(preserveModules && {
+                esbuild: {
+                    target: "node18",
+                    platform: "node",
+                    format: "esm"
+                }
+            }),
             rollupOptions: {
                 input,
                 output,
@@ -160,16 +197,25 @@ const buildViteNodeConfiguration = async (config: Configuration): Promise<UserCo
             middlewareMode: true,
             hmr: true
         },
-        // Only apply SSR config when NOT in preserveModules mode
-        ...(preserveModules ? {} : {
-            ssr: {
-                target: "node",
+        // Configure SSR for Node.js builds - needed for top-level await support
+        ssr: {
+            target: "node",
+            ...(preserveModules ? {
+                // When preserveModules is enabled, externalize dependencies (don't set noExternal)
+            } : {
+                // When bundling, bundle all dependencies
                 noExternal: true
-            }
-        }),
+            })
+        },
         optimizeDeps: {
             noDiscovery: true,
-            include: []
+            include: [],
+            ...(preserveModules && {
+                esbuildOptions: {
+                    target: "node18",
+                    platform: "node"
+                }
+            })
         }
     }
     

@@ -1,5 +1,5 @@
 import * as fs from "node:fs/promises"
-import { readFileSync } from "node:fs"
+import { readFileSync, accessSync } from "node:fs"
 import { createRequire } from "node:module"
 import { pathToFileURL } from "node:url"
 import path from "node:path"
@@ -62,8 +62,58 @@ export async function loadConfigFile(): Promise<Configuration | null> {
 
 /**
  * Configuration loaded from virun.config.js file.
- * Loaded eagerly on module import using top-level await.
+ * Loaded synchronously using readFileSync for immediate access.
  * All options share this cached instance.
  */
-const configuration: Configuration | null = await loadConfigFile()
-export default configuration
+let cachedConfiguration: Configuration | null | undefined = undefined
+
+function findProjectRootSync(startDir: string = process.cwd()): string {
+    let current = startDir
+    while (true) {
+        const pkgPath = path.join(current, "package.json")
+        try {
+            accessSync(pkgPath)
+            return current
+        } catch {
+            const parent = path.dirname(current)
+            if (parent === current) {
+                throw new Error("Could not find package.json. Make sure you're in a Node.js project directory.")
+            }
+            current = parent
+        }
+    }
+}
+
+function getConfigurationSync(): Configuration | null {
+    if (cachedConfiguration === undefined) {
+        // Load synchronously for use in synchronous defaultValue functions
+        try {
+            const root = findProjectRootSync()
+            const configPath = path.join(root, "virun.config.js")
+            
+            try {
+                // Check if file exists
+                accessSync(configPath)
+                // Try to read the file synchronously
+                const configContent = readFileSync(configPath, "utf-8")
+                const moduleExports: any = {}
+                const moduleObj = { exports: moduleExports }
+                const configDir = path.dirname(configPath)
+                const requireFn = createRequire(path.join(configDir, "package.json") + "/")
+                const fn = new Function("module", "exports", "require", configContent + "\nreturn module.exports")
+                const config = fn(moduleObj, moduleExports, requireFn) || moduleExports
+                cachedConfiguration = config as Configuration
+            } catch {
+                // File doesn't exist or can't be read
+                cachedConfiguration = null
+            }
+        } catch {
+            // Can't find project root
+            cachedConfiguration = null
+        }
+    }
+    return cachedConfiguration
+}
+
+// Export synchronous getter for use in defaultValue functions
+export default getConfigurationSync

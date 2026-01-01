@@ -7,7 +7,7 @@ export default defineOption({
     alias: "c",
     description: "Collect coverage information",
     required: false,
-    defaultValue: () => configuration?.test?.coverage ?? false,
+    defaultValue: () => configuration()?.test?.coverage ?? false,
     parse: (value?: string): boolean => {
         // Boolean flag: if present (even with empty value), return true
         if (value === undefined || value === "" || value === "true") {

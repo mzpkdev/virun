@@ -7,7 +7,7 @@ export default defineOption({
     alias: "o",
     description: "Output directory",
     required: false,
-    defaultValue: () => configuration?.outdir ?? "dist",
+    defaultValue: () => configuration()?.outdir ?? "dist",
     parse: (value: string): string => {
         return value
     }

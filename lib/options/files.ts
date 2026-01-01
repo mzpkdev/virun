@@ -7,7 +7,7 @@ export default defineOption({
     alias: "f",
     description: "Test file patterns (comma-separated)",
     required: false,
-    defaultValue: () => configuration?.test?.files,
+    defaultValue: () => configuration()?.test?.files,
     parse: (value?: string): string[] | undefined => {
         if (!value) {
             return undefined
