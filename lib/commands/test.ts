@@ -1,7 +1,11 @@
 import { defineCommand } from "cmdore"
 import { findProjectRoot } from "../utils/project.js"
 import { startVitest } from "vitest/node"
-import { watch, coverage, ui, reporter, files } from "../options/index.js"
+import watch from "../options/watch.js"
+import coverage from "../options/coverage.js"
+import ui from "../options/ui.js"
+import reporter from "../options/reporter.js"
+import files from "../options/files.js"
 
 
 export default defineCommand({

@@ -104,12 +104,14 @@ const buildViteNodeConfiguration = async (config: Configuration): Promise<UserCo
         entryFileNames: string
         preserveModules?: boolean
         preserveModulesRoot?: string
+        exports?: "auto" | "default" | "named" | "none"
     }> = []
     
     if (module!.includes("esm")) {
         outputConfigs.push({
             format: "es",
             entryFileNames: preserveModules ? "[name].mjs" : "index.mjs",
+            exports: "auto",
             ...(preserveModules && {
                 preserveModules: true,
                 preserveModulesRoot: await resolveSourceDirectory(entry!)
@@ -121,6 +123,7 @@ const buildViteNodeConfiguration = async (config: Configuration): Promise<UserCo
         outputConfigs.push({
             format: "cjs",
             entryFileNames: preserveModules ? "[name].js" : "index.js",
+            exports: "auto",
             ...(preserveModules && {
                 preserveModules: true,
                 preserveModulesRoot: await resolveSourceDirectory(entry!)
@@ -134,6 +137,7 @@ const buildViteNodeConfiguration = async (config: Configuration): Promise<UserCo
     
     const output = outputConfigs.length === 1 ? outputConfigs[0] : outputConfigs
     
+    // Resolve source directory for external function and later use
     // External function: handle dependencies based on preserveModules mode
     const externalFn = (id: string) => {
         // Always externalize Node.js built-ins
@@ -141,7 +145,8 @@ const buildViteNodeConfiguration = async (config: Configuration): Promise<UserCo
             return true
         }
         
-        // When preserveModules is enabled, externalize all dependencies
+        // When preserveModules is enabled, externalize all node_modules dependencies
+        // but NOT files from within the source directory (those should be processed separately)
         if (preserveModules) {
             // External if it's from node_modules (doesn't start with . or /)
             if (!id.startsWith(".") && !id.startsWith("/") && !path.isAbsolute(id)) {

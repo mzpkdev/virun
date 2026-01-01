@@ -1,5 +1,5 @@
 import { defineCommand } from "cmdore"
-import { outdir } from "../options/index.js"
+import outdir from "../options/outdir.js"
 import { findTypeScriptFiles } from "../utils/files.js"
 import { findProjectRoot } from "../utils/project.js"
 import * as fs from "node:fs/promises"
