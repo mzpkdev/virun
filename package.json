@@ -2,14 +2,13 @@
   "name": "virun",
   "version": "0.0.0",
   "description": "Opinionated Vite-powered workflow tool",
-  "type": "module",
   "main": "./lib/main.js",
   "types": "./lib/main.d.ts",
   "bin": {
     "virun": "bin/run"
   },
   "scripts": {
-    "build": "virun build --target node --entry lib/main.ts --preserve-modules --module esm cjs --outdir lib",
+    "build": "virun build --target node --entry lib/main.ts --preserve-modules --module cjs --outdir lib",
     "build:tsc": "tsc --build",
     "clean": "virun clean --outdir lib",
     "preprepare": "ts-patch install",

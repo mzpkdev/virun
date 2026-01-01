@@ -36,8 +36,18 @@ async function addDtsPlugin(target: Target, viteConfig: UserConfig, config: Conf
         let include: string[]
         if (isNode) {
             if (config.preserveModules) {
-                // Include all .ts and .tsx files when preserving modules
-                include = [ "src/**/*.ts", "src/**/*.tsx" ]
+                // Resolve source directory from entry point
+                const sourceDir = await resolveSourceDirectory(config.entry!)
+                // Calculate relative path from project root to source directory
+                const relativeSourceDir = path.relative(config.root!, sourceDir)
+                // Normalize path separators for glob patterns
+                // Handle case where source directory is the root (returns "." or empty)
+                if (relativeSourceDir === "." || relativeSourceDir === "") {
+                    include = [ "**/*.ts", "**/*.tsx" ]
+                } else {
+                    const sourcePattern = relativeSourceDir.replace(/\\/g, "/")
+                    include = [ `${sourcePattern}/**/*.ts`, `${sourcePattern}/**/*.tsx` ]
+                }
             } else {
                 // Only include entry file when bundling
                 include = [ config.entry! ]
@@ -49,6 +59,7 @@ async function addDtsPlugin(target: Target, viteConfig: UserConfig, config: Conf
         
         viteConfig.plugins?.push(
             dts({
+                root: config.root,
                 outDir: config.outdir,
                 include,
                 exclude: [ 
@@ -59,8 +70,16 @@ async function addDtsPlugin(target: Target, viteConfig: UserConfig, config: Conf
                     "node_modules", 
                     "dist" 
                 ],
-                // Preserve directory structure when preserveModules is enabled
-                copyDtsFiles: config.preserveModules ?? false
+                // Generate declaration files (don't copy existing ones)
+                copyDtsFiles: false,
+                // Insert types entry in package.json
+                insertTypesEntry: false,
+                // Override compilerOptions to ensure correct output directory
+                compilerOptions: {
+                    declaration: true,
+                    declarationMap: true,
+                    outDir: path.resolve(config.root!, config.outdir!)
+                }
             })
         )
     } catch {
@@ -135,35 +154,105 @@ const buildViteNodeConfiguration = async (config: Configuration): Promise<UserCo
     // Resolve source directory for external function and later use
     const sourceDir = await resolveSourceDirectory(entry!)
     
+    // Collect all entry point absolute paths to ensure they're never externalized
+    const entryPointPaths = new Set<string>()
+    if (preserveModules && typeof input === "object") {
+        for (const filePath of Object.values(input)) {
+            const absolutePath = path.resolve(filePath)
+            entryPointPaths.add(absolutePath)
+            // Also add normalized versions for Windows case-insensitivity
+            if (process.platform === "win32") {
+                entryPointPaths.add(absolutePath.toLowerCase())
+            }
+        }
+    }
+    
     // External function: handle dependencies based on preserveModules mode
-    const externalFn = (id: string) => {
+    const externalFn = (id: string, importer?: string) => {
         // Always externalize Node.js built-ins
         if (id.startsWith("node:") || builtinModules.includes(id)) {
             return true
         }
         
-        // When preserveModules is enabled, externalize all node_modules dependencies
-        // but NOT files from within the source directory (those should be processed separately)
+        // NEVER externalize TypeScript declaration files - they must be bundled
+        if (id.endsWith(".d.ts") || id.endsWith(".d.mts") || id.endsWith(".d.cts")) {
+            return false
+        }
+        
+        // Helper to check if an ID resolves to an entry point
+        const isEntryPoint = (moduleId: string): boolean => {
+            // Try to resolve the ID to an absolute path
+            let resolvedPath: string | null = null
+            
+            if (path.isAbsolute(moduleId)) {
+                resolvedPath = path.resolve(moduleId)
+            } else if (moduleId.startsWith("./") || moduleId.startsWith("../")) {
+                if (importer) {
+                    resolvedPath = path.resolve(path.dirname(importer), moduleId)
+                } else if (root) {
+                    resolvedPath = path.resolve(root, moduleId)
+                }
+            } else if (root && !moduleId.startsWith("/")) {
+                // Path relative to root (like "src/config.ts")
+                resolvedPath = path.resolve(root, moduleId)
+            }
+            
+            if (resolvedPath) {
+                const normalized = path.resolve(resolvedPath)
+                if (entryPointPaths.has(normalized)) {
+                    return true
+                }
+                // Check case-insensitive on Windows
+                if (process.platform === "win32" && entryPointPaths.has(normalized.toLowerCase())) {
+                    return true
+                }
+            }
+            
+            return false
+        }
+        
+        // NEVER externalize entry points themselves
+        if (isEntryPoint(id)) {
+            return false
+        }
+        
+        // When preserveModules is enabled, we need to handle this differently
         if (preserveModules) {
-            // External if it's from node_modules (doesn't start with . or /)
+            // Externalize node_modules (packages that don't start with . or /)
             if (!id.startsWith(".") && !id.startsWith("/") && !path.isAbsolute(id)) {
                 return true
             }
             
-            // When building with dual formats (both ESM and CJS), externalize internal imports
-            // to avoid interop issues during build (they'll be resolved at runtime)
+            // When building with dual formats (both ESM and CJS), we need to externalize
+            // internal imports to avoid interop issues. Each file is built separately,
+            // and relative imports will be resolved at runtime.
+            // This allows each module to reference others without bundling them together.
             if (module!.length > 1) {
-                // Externalize relative imports
+                // Externalize relative imports (already checked they're not entry points above)
                 if (id.startsWith("./") || id.startsWith("../")) {
                     return true
                 }
-                // Externalize absolute paths that are within the source directory
-                if (path.isAbsolute(id) && id.startsWith(sourceDir)) {
-                    return true
+                
+                // Externalize absolute paths within source directory (if not entry points)
+                if (path.isAbsolute(id)) {
+                    const normalizedId = path.resolve(id)
+                    const normalizedSourceDir = path.resolve(sourceDir)
+                    const isInSourceDir = process.platform === "win32"
+                        ? normalizedId.toLowerCase().startsWith(normalizedSourceDir.toLowerCase())
+                        : normalizedId.startsWith(normalizedSourceDir)
+                    
+                    if (isInSourceDir) {
+                        return true
+                    }
                 }
             }
+            
+            // Default: don't externalize when building single format
+            return false
         }
         
+        // When NOT using preserveModules (standard bundling mode)
+        // Don't externalize anything - bundle everything
         return false
     }
     
