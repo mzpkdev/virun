@@ -3,7 +3,7 @@ import { readFileSync, accessSync } from "node:fs"
 import { createRequire } from "node:module"
 import { pathToFileURL } from "node:url"
 import path from "node:path"
-import { findProjectRoot } from "../utils/project.ts"
+import { findProjectRoot } from "../utils/project"
 
 
 export type Mode = "build" | "serve"
@@ -90,7 +90,7 @@ function getConfigurationSync(): Configuration | null {
         try {
             const root = findProjectRootSync()
             const configPath = path.join(root, "virun.config.js")
-            
+
             try {
                 // Check if file exists
                 accessSync(configPath)

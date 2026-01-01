@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import { formatArgs } from "./utils.js"
-import { readPackageInfo } from "./package.js"
-import { displayHeader, displayInfo } from "./display.js"
+import { formatArgs } from "./utils"
+import { readPackageInfo } from "./package"
+import { displayHeader, displayInfo } from "./display"
 
 
 function main() {

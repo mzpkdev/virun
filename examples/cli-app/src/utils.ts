@@ -7,5 +7,5 @@ export function capitalize(str: string): string {
 }
 
 // Re-export from nested utils
-export { formatDate, truncate } from "./utils/helpers.js"
-export { isValidEmail, isValidUrl } from "./utils/validation.js"
+export { formatDate, truncate } from "./utils/helpers"
+export { isValidEmail, isValidUrl } from "./utils/validation"

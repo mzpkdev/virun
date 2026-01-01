@@ -1,11 +1,11 @@
 import { defineCommand } from "cmdore"
-import { build } from "../core/vite.ts"
-import entry from "../options/entry.ts"
-import outdir from "../options/outdir.ts"
-import target from "../options/target.ts"
-import module from "../options/module.ts"
-import preserveModules from "../options/preserveModules.ts"
-import ConfigurationBuilder from "../core/ConfigurationBuilder.ts"
+import { build } from "../core/vite"
+import entry from "../options/entry"
+import outdir from "../options/outdir"
+import target from "../options/target"
+import module from "../options/module"
+import preserveModules from "../options/preserveModules"
+import ConfigurationBuilder from "../core/ConfigurationBuilder"
 
 
 export default defineCommand({
@@ -17,7 +17,7 @@ export default defineCommand({
         "--target node --entry src/main.ts",
         "--target node --preserve-modules"
     ],
-    options: [ target, entry, outdir, module, preserveModules ],
+    options: [target, entry, outdir, module, preserveModules],
     run: async function* (args: any) {
         const { target, entry, outdir, module, "preserve-modules": preserveModules } = args
         const builder = new ConfigurationBuilder("build") as any

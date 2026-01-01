@@ -1,6 +1,6 @@
 import { defineOption } from "cmdore"
-import configuration from "../core/configuration.ts"
-import type { Module } from "../core/configuration.ts"
+import configuration from "../core/configuration"
+import type { Module } from "../core/configuration"
 
 export default defineOption({
     name: "module",

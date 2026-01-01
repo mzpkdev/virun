@@ -1,9 +1,9 @@
 import { defineCommand } from "cmdore"
-import { serve } from "../core/vite.ts"
-import entry from "../options/entry.ts"
-import port from "../options/port.ts"
-import target from "../options/target.ts"
-import ConfigurationBuilder from "../core/ConfigurationBuilder.ts"
+import { serve } from "../core/vite"
+import entry from "../options/entry"
+import port from "../options/port"
+import target from "../options/target"
+import ConfigurationBuilder from "../core/ConfigurationBuilder"
 
 
 export default defineCommand({
@@ -15,7 +15,7 @@ export default defineCommand({
         "--target node --entry src/main.ts",
         "--target browser --port 3000"
     ],
-    options: [ target, entry, port ],
+    options: [target, entry, port],
     run: async function* ({ target, entry, port }) {
         const configuration = await new ConfigurationBuilder("serve")
             .entry(entry)

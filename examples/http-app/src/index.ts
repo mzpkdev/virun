@@ -1,9 +1,9 @@
 import { createServer } from "node:http"
-import { getConfig } from "./config.js"
-import { formatDate, getGreeting } from "./utils.js"
-import { log, logError } from "./logger.js"
-import { createCorsHandler } from "./middleware/cors.js"
-import { handleApiRequest, handleHealthCheck } from "./routes/api.js"
+import { getConfig } from "./config"
+import { formatDate, getGreeting } from "./utils"
+import { log, logError } from "./logger"
+import { createCorsHandler } from "./middleware/cors"
+import { handleApiRequest, handleHealthCheck } from "./routes/api"
 
 
 const { port: PORT, host: HOST } = getConfig()

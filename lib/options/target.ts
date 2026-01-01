@@ -1,5 +1,5 @@
 import { defineOption } from "cmdore"
-import type { Target } from "../core/configuration.ts"
+import type { Target } from "../core/configuration"
 
 
 export default defineOption({

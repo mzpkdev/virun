@@ -1,11 +1,11 @@
 import { defineCommand } from "cmdore"
-import { findProjectRoot } from "../utils/project.ts"
+import { findProjectRoot } from "../utils/project"
 import { startVitest } from "vitest/node"
-import watch from "../options/watch.ts"
-import coverage from "../options/coverage.ts"
-import ui from "../options/ui.ts"
-import reporter from "../options/reporter.ts"
-import files from "../options/files.ts"
+import watch from "../options/watch"
+import coverage from "../options/coverage"
+import ui from "../options/ui"
+import reporter from "../options/reporter"
+import files from "../options/files"
 
 
 export default defineCommand({
@@ -19,7 +19,7 @@ export default defineCommand({
         "--reporter verbose",
         "--files src/utils.test.ts"
     ],
-    options: [ watch, coverage, ui, reporter, files ],
+    options: [watch, coverage, ui, reporter, files],
     run: async function* ({ watch, coverage, ui, reporter, files }) {
         const root = await findProjectRoot()
         const vitestOptions: any = { root }

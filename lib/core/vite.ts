@@ -1,9 +1,9 @@
 import { builtinModules } from "node:module"
 import path from "node:path"
 import { createServer, createViteRuntime, UserConfig, ViteDevServer, Plugin } from "vite"
-import type { Configuration, Target } from "./configuration.ts"
+import type { Configuration, Target } from "./configuration"
 import { build as viteBuild } from "vite"
-import { findTypeScriptFiles, resolveSourceDirectory } from "../utils/files.ts"
+import { findTypeScriptFiles, resolveSourceDirectory } from "../utils/files"
 
 
 function createEsbuildNodePlugin(): Plugin {
@@ -31,7 +31,7 @@ async function addDtsPlugin(target: Target, viteConfig: UserConfig, config: Conf
     const isNode = target === "node"
     try {
         const { default: dts } = await import("vite-plugin-dts")
-        
+
         // Determine include pattern based on target and preserveModules
         let include: string[]
         if (isNode) {
@@ -43,32 +43,32 @@ async function addDtsPlugin(target: Target, viteConfig: UserConfig, config: Conf
                 // Normalize path separators for glob patterns
                 // Handle case where source directory is the root (returns "." or empty)
                 if (relativeSourceDir === "." || relativeSourceDir === "") {
-                    include = [ "**/*.ts", "**/*.tsx" ]
+                    include = ["**/*.ts", "**/*.tsx"]
                 } else {
                     const sourcePattern = relativeSourceDir.replace(/\\/g, "/")
-                    include = [ `${sourcePattern}/**/*.ts`, `${sourcePattern}/**/*.tsx` ]
+                    include = [`${sourcePattern}/**/*.ts`, `${sourcePattern}/**/*.tsx`]
                 }
             } else {
                 // Only include entry file when bundling
-                include = [ config.entry! ]
+                include = [config.entry!]
             }
         } else {
             // Browser: always include all src files
-            include = [ "src/**/*.ts", "src/**/*.tsx" ]
+            include = ["src/**/*.ts", "src/**/*.tsx"]
         }
-        
+
         viteConfig.plugins?.push(
             dts({
                 root: config.root,
                 outDir: config.outdir,
                 include,
-                exclude: [ 
-                    "**/*.test.ts", 
-                    "**/*.test.tsx", 
-                    "**/*.spec.ts", 
-                    "**/*.spec.tsx", 
-                    "node_modules", 
-                    "dist" 
+                exclude: [
+                    "**/*.test.ts",
+                    "**/*.test.tsx",
+                    "**/*.spec.ts",
+                    "**/*.spec.tsx",
+                    "node_modules",
+                    "dist"
                 ],
                 // Generate declaration files (don't copy existing ones)
                 copyDtsFiles: false,
@@ -89,19 +89,19 @@ async function addDtsPlugin(target: Target, viteConfig: UserConfig, config: Conf
 
 const buildViteNodeConfiguration = async (config: Configuration): Promise<UserConfig> => {
     const { root, entry, outdir, port, module, preserveModules } = config
-    
+
     // Determine input based on preserveModules mode
     let input: string | Record<string, string>
-    
+
     if (preserveModules) {
         // Find all TypeScript files in the directory
         const sourceDir = await resolveSourceDirectory(entry!)
         const tsFiles = await findTypeScriptFiles(sourceDir)
-        
+
         if (tsFiles.length === 0) {
             throw new Error(`No TypeScript files found in ${sourceDir}`)
         }
-        
+
         // Create entry points object preserving directory structure
         input = {}
         for (const file of tsFiles) {
@@ -116,10 +116,10 @@ const buildViteNodeConfiguration = async (config: Configuration): Promise<UserCo
         // Standard bundling mode: single entry point
         input = entry!
     }
-    
+
     // Determine output configuration based on module formats
     const outputConfigs: any[] = []
-    
+
     if (module!.includes("esm")) {
         outputConfigs.push({
             format: "es",
@@ -131,7 +131,7 @@ const buildViteNodeConfiguration = async (config: Configuration): Promise<UserCo
             })
         })
     }
-    
+
     if (module!.includes("cjs")) {
         outputConfigs.push({
             format: "cjs",
@@ -144,16 +144,16 @@ const buildViteNodeConfiguration = async (config: Configuration): Promise<UserCo
             })
         })
     }
-    
+
     if (outputConfigs.length === 0) {
         throw new Error("At least one module format must be specified")
     }
-    
+
     const output = outputConfigs.length === 1 ? outputConfigs[0] : outputConfigs
-    
+
     // Resolve source directory for external function and later use
     const sourceDir = await resolveSourceDirectory(entry!)
-    
+
     // Collect all entry point absolute paths to ensure they're never externalized
     const entryPointPaths = new Set<string>()
     if (preserveModules && typeof input === "object") {
@@ -166,24 +166,24 @@ const buildViteNodeConfiguration = async (config: Configuration): Promise<UserCo
             }
         }
     }
-    
+
     // External function: handle dependencies based on preserveModules mode
     const externalFn = (id: string, importer?: string) => {
         // Always externalize Node.js built-ins
         if (id.startsWith("node:") || builtinModules.includes(id)) {
             return true
         }
-        
+
         // NEVER externalize TypeScript declaration files - they must be bundled
         if (id.endsWith(".d.ts") || id.endsWith(".d.mts") || id.endsWith(".d.cts")) {
             return false
         }
-        
+
         // Helper to check if an ID resolves to an entry point
         const isEntryPoint = (moduleId: string): boolean => {
             // Try to resolve the ID to an absolute path
             let resolvedPath: string | null = null
-            
+
             if (path.isAbsolute(moduleId)) {
                 resolvedPath = path.resolve(moduleId)
             } else if (moduleId.startsWith("./") || moduleId.startsWith("../")) {
@@ -196,7 +196,7 @@ const buildViteNodeConfiguration = async (config: Configuration): Promise<UserCo
                 // Path relative to root (like "src/config.ts")
                 resolvedPath = path.resolve(root, moduleId)
             }
-            
+
             if (resolvedPath) {
                 const normalized = path.resolve(resolvedPath)
                 if (entryPointPaths.has(normalized)) {
@@ -207,22 +207,22 @@ const buildViteNodeConfiguration = async (config: Configuration): Promise<UserCo
                     return true
                 }
             }
-            
+
             return false
         }
-        
+
         // NEVER externalize entry points themselves
         if (isEntryPoint(id)) {
             return false
         }
-        
+
         // When preserveModules is enabled, we need to handle this differently
         if (preserveModules) {
             // Externalize node_modules (packages that don't start with . or /)
             if (!id.startsWith(".") && !id.startsWith("/") && !path.isAbsolute(id)) {
                 return true
             }
-            
+
             // When building with dual formats (both ESM and CJS), we need to externalize
             // internal imports to avoid interop issues. Each file is built separately,
             // and relative imports will be resolved at runtime.
@@ -232,7 +232,7 @@ const buildViteNodeConfiguration = async (config: Configuration): Promise<UserCo
                 if (id.startsWith("./") || id.startsWith("../")) {
                     return true
                 }
-                
+
                 // Externalize absolute paths within source directory (if not entry points)
                 if (path.isAbsolute(id)) {
                     const normalizedId = path.resolve(id)
@@ -240,26 +240,26 @@ const buildViteNodeConfiguration = async (config: Configuration): Promise<UserCo
                     const isInSourceDir = process.platform === "win32"
                         ? normalizedId.toLowerCase().startsWith(normalizedSourceDir.toLowerCase())
                         : normalizedId.startsWith(normalizedSourceDir)
-                    
+
                     if (isInSourceDir) {
                         return true
                     }
                 }
             }
-            
+
             // Default: don't externalize when building single format
             return false
         }
-        
+
         // When NOT using preserveModules (standard bundling mode)
         // Don't externalize anything - bundle everything
         return false
     }
-    
+
     // Check if output is within source directory
     const resolvedOutdir = path.resolve(root!, outdir!)
     const isOutputInSource = resolvedOutdir.startsWith(sourceDir)
-    
+
     const vite: UserConfig = {
         root,
         logLevel: "info",
@@ -321,20 +321,20 @@ const buildViteNodeConfiguration = async (config: Configuration): Promise<UserCo
             })
         }
     }
-    
+
     await addDtsPlugin("node", vite, config)
     return vite
 }
 
 const buildViteBrowserConfiguration = async (config: Configuration): Promise<UserConfig> => {
     const { root, outdir, port } = config
-    
+
     // Check if output is within source directory
     const resolvedOutdir = path.resolve(root!, outdir!)
     // For browser, assume src directory
     const sourceDir = path.resolve(root!, "src")
     const isOutputInSource = resolvedOutdir.startsWith(sourceDir)
-    
+
     const vite: UserConfig = {
         root,
         logLevel: "info",
@@ -393,7 +393,7 @@ export const serve = async (target: Target, configuration: Configuration) => {
         process.on("SIGINT", cleanup)
         process.on("SIGTERM", cleanup)
         // Keep the process alive - wait indefinitely until cleanup signal
-        await new Promise(() => {})
+        await new Promise(() => { })
     } catch (error) {
         if (server) {
             await server.close()

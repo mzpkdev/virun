@@ -1,7 +1,7 @@
 import { defineCommand } from "cmdore"
-import outdir from "../options/outdir.ts"
-import { findTypeScriptFiles } from "../utils/files.ts"
-import { findProjectRoot } from "../utils/project.ts"
+import outdir from "../options/outdir"
+import { findTypeScriptFiles } from "../utils/files"
+import { findProjectRoot } from "../utils/project"
 import * as fs from "node:fs/promises"
 import * as path from "node:path"
 
@@ -90,10 +90,10 @@ async function clean(outdirPath: string): Promise<void> {
     if (!outdirPath) {
         throw new Error("Missing required configuration: outdir")
     }
-    
+
     const root = await findProjectRoot()
     const resolvedOutdir = path.resolve(root, outdirPath)
-    
+
     // Check if outdir contains TypeScript source files (preserve-modules mode)
     // Note: findTypeScriptFiles may return .d.ts files, so filter them out
     let tsFiles: string[] = []
@@ -107,7 +107,7 @@ async function clean(outdirPath: string): Promise<void> {
             throw error
         }
     }
-    
+
     if (tsFiles.length > 0) {
         // Strategy A: Match artifacts to source files in outdir
         for (const tsFile of tsFiles) {
