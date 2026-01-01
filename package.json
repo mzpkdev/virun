@@ -1,6 +1,6 @@
 {
   "name": "virun",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Opinionated Vite-powered workflow tool",
   "type": "module",
   "main": "./lib/main.mjs",
