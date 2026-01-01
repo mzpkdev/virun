@@ -25,7 +25,18 @@ async function cleanDirectory(dir: string): Promise<void> {
         for (const entry of entries) {
             const fullPath = path.join(dir, entry.name)
             if (entry.isDirectory()) {
-                if (entry.name !== 'node_modules') {
+                if (entry.name === '_virtual') {
+                    // Remove _virtual directory recursively
+                    try {
+                        await fs.rm(fullPath, { recursive: true, force: true })
+                        console.log(`Removed directory: ${fullPath}`)
+                    } catch (error: any) {
+                        // Ignore ENOENT (directory doesn't exist), that's fine
+                        if (error.code !== 'ENOENT') {
+                            console.warn(`Failed to remove ${fullPath}: ${error.message}`)
+                        }
+                    }
+                } else if (entry.name !== 'node_modules') {
                     await cleanDirectory(fullPath)
                 }
             } else if (entry.isFile()) {
@@ -36,6 +47,38 @@ async function cleanDirectory(dir: string): Promise<void> {
             }
         }
     } catch (error: any) {
+        if (error.code !== 'ENOENT') {
+            throw error
+        }
+    }
+}
+
+
+async function removeVirtualDirectories(dir: string): Promise<void> {
+    try {
+        const entries = await fs.readdir(dir, { withFileTypes: true })
+        for (const entry of entries) {
+            const fullPath = path.join(dir, entry.name)
+            if (entry.isDirectory()) {
+                if (entry.name === '_virtual') {
+                    // Remove _virtual directory recursively
+                    try {
+                        await fs.rm(fullPath, { recursive: true, force: true })
+                        console.log(`Removed directory: ${fullPath}`)
+                    } catch (error: any) {
+                        // Ignore ENOENT (directory doesn't exist), that's fine
+                        if (error.code !== 'ENOENT') {
+                            console.warn(`Failed to remove ${fullPath}: ${error.message}`)
+                        }
+                    }
+                } else if (entry.name !== 'node_modules') {
+                    // Recursively search in subdirectories
+                    await removeVirtualDirectories(fullPath)
+                }
+            }
+        }
+    } catch (error: any) {
+        // Ignore ENOENT (directory doesn't exist), that's fine
         if (error.code !== 'ENOENT') {
             throw error
         }
@@ -81,8 +124,11 @@ async function clean(outdirPath: string): Promise<void> {
                 await removeFile(artifact)
             }
         }
+        // Remove _virtual directories
+        await removeVirtualDirectories(resolvedOutdir)
     } else {
         // Strategy B: Clean entire output directory (regular bundling mode)
+        // cleanDirectory already handles _virtual directories
         await cleanDirectory(resolvedOutdir)
         // Remove the directory itself after cleaning (only for separate output dirs like dist)
         try {

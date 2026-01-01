@@ -9,7 +9,7 @@
     "virun": "bin/run"
   },
   "scripts": {
-    "build": "virun build --target node --entry lib/main.ts --preserve-modules --module esm --outdir lib",
+    "build": "virun build --target node --entry lib/main.ts --preserve-modules --module esm cjs --outdir lib",
     "build:tsc": "tsc --build",
     "clean": "virun clean --outdir lib",
     "preprepare": "ts-patch install",
