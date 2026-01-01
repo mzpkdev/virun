@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "virun serve --target browser --entry index.html",
     "build": "virun build --target browser --entry index.html",
+    "clean": "virun clean --outdir dist",
     "test": "virun test"
   },
   "dependencies": {},
