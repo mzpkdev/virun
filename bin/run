@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import('../lib/main.js').catch(error => {
+import('../lib/main.mjs').catch(error => {
   console.error(error);
   process.exit(1);
 });
