@@ -1,8 +1,8 @@
 import { Program, terminal } from "cmdore"
-import buildCommand from "./commands/build.js"
-import serveCommand from "./commands/serve.js"
-import testCommand from "./commands/test.js"
-import cleanCommand from "./commands/clean.js"
+import buildCommand from "./commands/build.ts"
+import serveCommand from "./commands/serve.ts"
+import testCommand from "./commands/test.ts"
+import cleanCommand from "./commands/clean.ts"
 
 
 export const main = async (...varargs: string[]): Promise<number> => {

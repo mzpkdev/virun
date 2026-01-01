@@ -1,9 +1,9 @@
 import { defineCommand } from "cmdore"
-import { serve } from "../core/vite.js"
-import entry from "../options/entry.js"
-import port from "../options/port.js"
-import target from "../options/target.js"
-import ConfigurationBuilder from "../core/ConfigurationBuilder.js"
+import { serve } from "../core/vite.ts"
+import entry from "../options/entry.ts"
+import port from "../options/port.ts"
+import target from "../options/target.ts"
+import ConfigurationBuilder from "../core/ConfigurationBuilder.ts"
 
 
 export default defineCommand({

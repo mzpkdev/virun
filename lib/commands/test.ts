@@ -1,11 +1,11 @@
 import { defineCommand } from "cmdore"
-import { findProjectRoot } from "../utils/project.js"
+import { findProjectRoot } from "../utils/project.ts"
 import { startVitest } from "vitest/node"
-import watch from "../options/watch.js"
-import coverage from "../options/coverage.js"
-import ui from "../options/ui.js"
-import reporter from "../options/reporter.js"
-import files from "../options/files.js"
+import watch from "../options/watch.ts"
+import coverage from "../options/coverage.ts"
+import ui from "../options/ui.ts"
+import reporter from "../options/reporter.ts"
+import files from "../options/files.ts"
 
 
 export default defineCommand({

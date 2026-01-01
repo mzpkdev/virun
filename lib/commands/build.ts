@@ -1,11 +1,11 @@
 import { defineCommand } from "cmdore"
-import { build } from "../core/vite.js"
-import entry from "../options/entry.js"
-import outdir from "../options/outdir.js"
-import target from "../options/target.js"
-import module from "../options/module.js"
-import preserveModules from "../options/preserveModules.js"
-import ConfigurationBuilder from "../core/ConfigurationBuilder.js"
+import { build } from "../core/vite.ts"
+import entry from "../options/entry.ts"
+import outdir from "../options/outdir.ts"
+import target from "../options/target.ts"
+import module from "../options/module.ts"
+import preserveModules from "../options/preserveModules.ts"
+import ConfigurationBuilder from "../core/ConfigurationBuilder.ts"
 
 
 export default defineCommand({

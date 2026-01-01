@@ -3,7 +3,7 @@ import { readFileSync, accessSync } from "node:fs"
 import { createRequire } from "node:module"
 import { pathToFileURL } from "node:url"
 import path from "node:path"
-import { findProjectRoot } from "../utils/project.js"
+import { findProjectRoot } from "../utils/project.ts"
 
 
 export type Mode = "build" | "serve"

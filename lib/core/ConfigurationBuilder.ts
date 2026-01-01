@@ -1,6 +1,6 @@
 ﻿import * as path from "node:path"
-import { findProjectRoot } from "../utils/project.js"
-import type { Mode, Configuration, Module } from "./configuration.js"
+import { findProjectRoot } from "../utils/project.ts"
+import type { Mode, Configuration, Module } from "./configuration.ts"
 
 
 class ConfigurationBuilder {
@@ -56,4 +56,4 @@ class ConfigurationBuilder {
 
 
 export default ConfigurationBuilder
-export type { Mode, Target, Module, Configuration } from "./configuration.js"
+export type { Mode, Target, Module, Configuration } from "./configuration.ts"

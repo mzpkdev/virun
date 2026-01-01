@@ -1,5 +1,5 @@
 import { defineOption } from "cmdore"
-import configuration from "../core/configuration.js"
+import configuration from "../core/configuration.ts"
 
 export default defineOption({
     name: "preserve-modules",

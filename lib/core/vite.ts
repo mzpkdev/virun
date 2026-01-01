@@ -1,9 +1,9 @@
 import { builtinModules } from "node:module"
 import path from "node:path"
 import { createServer, createViteRuntime, UserConfig, ViteDevServer, Plugin } from "vite"
-import type { Configuration, Target } from "./configuration.js"
+import type { Configuration, Target } from "./configuration.ts"
 import { build as viteBuild } from "vite"
-import { findTypeScriptFiles, resolveSourceDirectory } from "../utils/files.js"
+import { findTypeScriptFiles, resolveSourceDirectory } from "../utils/files.ts"
 
 
 function createEsbuildNodePlugin(): Plugin {
