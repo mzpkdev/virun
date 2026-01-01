@@ -99,13 +99,7 @@ const buildViteNodeConfiguration = async (config: Configuration): Promise<UserCo
     }
     
     // Determine output configuration based on module formats
-    const outputConfigs: Array<{
-        format: "es" | "cjs"
-        entryFileNames: string
-        preserveModules?: boolean
-        preserveModulesRoot?: string
-        exports?: "auto" | "default" | "named" | "none"
-    }> = []
+    const outputConfigs: any[] = []
     
     if (module!.includes("esm")) {
         outputConfigs.push({
@@ -124,6 +118,7 @@ const buildViteNodeConfiguration = async (config: Configuration): Promise<UserCo
             format: "cjs",
             entryFileNames: preserveModules ? "[name].js" : "index.js",
             exports: "auto",
+            interop: "auto",
             ...(preserveModules && {
                 preserveModules: true,
                 preserveModulesRoot: await resolveSourceDirectory(entry!)
@@ -138,6 +133,8 @@ const buildViteNodeConfiguration = async (config: Configuration): Promise<UserCo
     const output = outputConfigs.length === 1 ? outputConfigs[0] : outputConfigs
     
     // Resolve source directory for external function and later use
+    const sourceDir = await resolveSourceDirectory(entry!)
+    
     // External function: handle dependencies based on preserveModules mode
     const externalFn = (id: string) => {
         // Always externalize Node.js built-ins
@@ -152,6 +149,19 @@ const buildViteNodeConfiguration = async (config: Configuration): Promise<UserCo
             if (!id.startsWith(".") && !id.startsWith("/") && !path.isAbsolute(id)) {
                 return true
             }
+            
+            // When building with dual formats (both ESM and CJS), externalize internal imports
+            // to avoid interop issues during build (they'll be resolved at runtime)
+            if (module!.length > 1) {
+                // Externalize relative imports
+                if (id.startsWith("./") || id.startsWith("../")) {
+                    return true
+                }
+                // Externalize absolute paths that are within the source directory
+                if (path.isAbsolute(id) && id.startsWith(sourceDir)) {
+                    return true
+                }
+            }
         }
         
         return false
@@ -159,7 +169,6 @@ const buildViteNodeConfiguration = async (config: Configuration): Promise<UserCo
     
     // Check if output is within source directory
     const resolvedOutdir = path.resolve(root!, outdir!)
-    const sourceDir = await resolveSourceDirectory(entry!)
     const isOutputInSource = resolvedOutdir.startsWith(sourceDir)
     
     const vite: UserConfig = {
