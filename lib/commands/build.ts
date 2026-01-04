@@ -1,14 +1,13 @@
 import { defineCommand } from "cmdore"
-import { build } from "../core/vite"
-import entry from "../options/entry"
-import outdir from "../options/outdir"
-import target from "../options/target"
-import module from "../options/module"
-import preserveModules from "../options/preserveModules"
-import ConfigurationBuilder from "../core/ConfigurationBuilder"
+import { vite } from "../core/vite"
+import { entryOption } from "../options/entry.js"
+import { outdirOption } from "../options/outdir.js"
+import { targetOption } from "../options/target.js"
+import { moduleOption } from "../options/module.js"
+import { Configuration } from "../core/Configuration"
 
 
-export default defineCommand({
+export const buildCommand = defineCommand({
     name: "build",
     description: "Build project for production",
     examples: [
@@ -17,16 +16,14 @@ export default defineCommand({
         "--target node --entry src/main.ts",
         "--target node --preserve-modules"
     ],
-    options: [target, entry, outdir, module, preserveModules],
-    run: async function* (args: any) {
-        const { target, entry, outdir, module, "preserve-modules": preserveModules } = args
-        const builder = new ConfigurationBuilder("build") as any
-        builder.entry(entry)
-        builder.outdir(outdir)
-        builder.module(module)
-        builder.preserveModules(preserveModules)
-        const configuration = await builder.build()
-        await build(target, configuration)
+    options: [ targetOption, entryOption, outdirOption, moduleOption ],
+    run: async function* ({ target, entry, outdir, module }) {
+        const configuration = await new Configuration.Builder("build")
+            .entry(entry)
+            .outdir(outdir)
+            .module(module)
+            .build()
+        await vite.build(target, configuration)
         return 0
     }
 })

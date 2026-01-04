@@ -1,3 +1,6 @@
+build
+dist
+
 # Dependencies
 node_modules/
 .pnp

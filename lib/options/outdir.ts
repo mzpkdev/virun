@@ -1,13 +1,11 @@
 import { defineOption } from "cmdore"
-import configuration from "../core/configuration"
 
 
-export default defineOption({
+export const outdirOption = defineOption({
     name: "outdir",
     alias: "o",
     description: "Output directory",
-    required: false,
-    defaultValue: () => configuration()?.outdir ?? "dist",
+    required: true,
     parse: (value: string): string => {
         return value
     }

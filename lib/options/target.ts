@@ -1,8 +1,8 @@
 import { defineOption } from "cmdore"
-import type { Target } from "../core/configuration"
+import type { Target } from "../core/Configuration"
 
 
-export default defineOption({
+export const targetOption = defineOption({
     name: "target",
     alias: "t",
     description: "Build target: node or browser",

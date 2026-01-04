@@ -1,8 +1,7 @@
 import { Program, terminal } from "cmdore"
-import buildCommand from "./commands/build"
-import serveCommand from "./commands/serve"
-import testCommand from "./commands/test"
-import cleanCommand from "./commands/clean"
+import { buildCommand } from "./commands/build.js"
+import { serveCommand } from "./commands/serve.js"
+import { testCommand } from "./commands/test.js"
 
 
 export const main = async (...varargs: string[]): Promise<number> => {
@@ -11,7 +10,6 @@ export const main = async (...varargs: string[]): Promise<number> => {
         .register(buildCommand as any)
         .register(serveCommand as any)
         .register(testCommand as any)
-        .register(cleanCommand as any)
     await program.execute(varargs)
     return 0
 }
@@ -22,4 +20,3 @@ main(...process.argv.slice(2))
         terminal.error(error)
         process.exit(1)
     })
-

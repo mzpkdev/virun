@@ -1,12 +1,13 @@
 import { defineCommand } from "cmdore"
-import { serve } from "../core/vite"
-import entry from "../options/entry"
-import port from "../options/port"
-import target from "../options/target"
-import ConfigurationBuilder from "../core/ConfigurationBuilder"
+import { vite } from "../core/vite"
+// import * as vite from "../core/vite_2"
+import { entryOption } from "../options/entry.js"
+import { portOption } from "../options/port.js"
+import { targetOption } from "../options/target.js"
+import { Configuration } from "../core/Configuration"
 
 
-export default defineCommand({
+export const serveCommand = defineCommand({
     name: "serve",
     description: "Start development server with HMR",
     examples: [
@@ -15,13 +16,13 @@ export default defineCommand({
         "--target node --entry src/main.ts",
         "--target browser --port 3000"
     ],
-    options: [target, entry, port],
+    options: [ targetOption, entryOption, portOption ],
     run: async function* ({ target, entry, port }) {
-        const configuration = await new ConfigurationBuilder("serve")
+        const configuration = await new Configuration.Builder("serve")
             .entry(entry)
             .port(port)
             .build()
-        await serve(target, configuration)
+        await vite.serve(target, configuration)
         return 0
     }
 })

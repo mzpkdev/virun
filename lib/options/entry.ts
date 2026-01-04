@@ -1,13 +1,11 @@
 import { defineOption } from "cmdore"
-import configuration from "../core/configuration"
 
 
-export default defineOption({
+export const entryOption = defineOption({
     name: "entry",
     alias: "e",
     description: "Entry point file path",
-    required: false,
-    defaultValue: () => configuration()?.entry ?? "src/main.ts",
+    required: true,
     parse: (value: string): string => {
         return value
     }

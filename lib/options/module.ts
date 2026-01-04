@@ -1,13 +1,13 @@
 import { defineOption } from "cmdore"
-import configuration from "../core/configuration"
-import type { Module } from "../core/configuration"
+import { Module } from "../core/Configuration"
 
-export default defineOption({
+
+export const moduleOption = defineOption({
     name: "module",
     alias: "m",
     description: "Output module format(s): esm, cjs, or both (comma-separated)",
     required: false,
-    defaultValue: (): Module[] => configuration()?.module ?? ["esm"],
+    defaultValue: (): Module[] => [ "esm" ],
     parse: (...values: string[]): Module[] => {
         return values as Module[]
     }
