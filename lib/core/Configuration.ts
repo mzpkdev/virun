@@ -4,14 +4,14 @@ import { findProjectRoot } from "../utils/project.js"
 
 export type Mode = "build" | "serve"
 export type Target = "node" | "browser"
-export type Module = "esm" | "cjs"
+export type Module = "es" | "cjs"
 
 export type Configuration = {
     root?: string
     mode?: Mode
     entry?: string
     module?: Module[]
-    outdir?: string
+    outDir?: string
     port?: number
     preserveModules?: boolean
     test?: {
@@ -62,7 +62,7 @@ export namespace Configuration {
                 root,
                 mode: this._mode,
                 entry: path.resolve(root, this._entry!),
-                outdir: this._outdir,
+                outDir: this._outdir,
                 port: this._port,
                 module: this._module,
                 preserveModules: this._preserveModules

@@ -1,17 +1,17 @@
 import * as path from "node:path"
 import { build as viteBuild, createServer, createViteRuntime, UserConfig, ViteDevServer } from "vite"
-import type { Configuration, Target } from "./Configuration"
+import type { Configuration, Target } from "./Configuration.js"
 
 
 const createViteNodeConfiguration = async (configuration: Configuration): Promise<UserConfig> => {
-    const { outdir: outDir } = configuration
+    const { outDir, module } = configuration
     return {
         build: {
             outDir,
             emptyOutDir: true,
             lib: {
                 entry: path.resolve(process.cwd(), "src/index.ts"),
-                formats: [ "es" ],
+                formats: module,
                 fileName: "index"
             },
             rollupOptions: {
@@ -23,14 +23,28 @@ const createViteNodeConfiguration = async (configuration: Configuration): Promis
     }
 }
 
+const createViteBrowserConfiguration = async (configuration: Configuration): Promise<UserConfig> => {
+    const { outDir } = configuration
+    return {
+        build: {
+            outDir,
+            emptyOutDir: true
+        }
+    }
+}
 
-const build = async (_target: Target, configuration: Configuration): Promise<void> => {
-    const viteConfiguration = await createViteNodeConfiguration(configuration)
+
+const build = async (target: Target, configuration: Configuration): Promise<void> => {
+    const viteConfiguration = target == "node"
+        ? await createViteNodeConfiguration(configuration)
+        : await createViteBrowserConfiguration(configuration)
     await viteBuild(viteConfiguration)
 }
 
 const serve = async (target: Target, configuration: Configuration): Promise<void> => {
-    const viteConfiguration = await createViteNodeConfiguration(configuration)
+    const viteConfiguration = target == "node"
+        ? await createViteNodeConfiguration(configuration)
+        : await createViteBrowserConfiguration(configuration)
     let server: ViteDevServer | null = null
     try {
         server = await createServer(viteConfiguration)
@@ -40,7 +54,6 @@ const serve = async (target: Target, configuration: Configuration): Promise<void
         }
         switch (target) {
             case "node":
-                console.log("wat")
                 const runtime = await createViteRuntime(server)
                 await runtime.executeUrl(configuration.entry!)
                 cleanup = async () => {
@@ -56,9 +69,7 @@ const serve = async (target: Target, configuration: Configuration): Promise<void
         }
         process.on("SIGINT", cleanup)
         process.on("SIGTERM", cleanup)
-        // Keep the process alive - wait indefinitely until cleanup signal
-        await new Promise(() => {
-        })
+        await new Promise(() => void 0)
     } catch (error) {
         if (server) {
             await server.close()

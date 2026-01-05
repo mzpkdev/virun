@@ -2,7 +2,7 @@
   "name": "virun",
   "version": "0.0.1",
   "description": "Opinionated Vite-powered workflow tool",
-  "type": "commonjs",
+  "type": "module",
   "main": "./build/main.js",
   "types": "./build/main.d.ts",
   "bin": {
@@ -38,10 +38,10 @@
   },
   "files": [
     "bin/",
-    "lib/**/*.js",
-    "lib/**/*.js.map",
-    "lib/**/*.d.ts",
-    "lib/**/*.d.ts.map",
+    "build/**/*.js",
+    "build/**/*.js.map",
+    "build/**/*.d.ts",
+    "build/**/*.d.ts.map",
     "README.md",
     "LICENSE"
   ],

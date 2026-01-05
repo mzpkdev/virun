@@ -8,7 +8,7 @@
     "cli-app": "./dist/index.js"
   },
   "scripts": {
-    "build": "virun build --target node --entry src/index.ts --module esm cjs",
+    "build": "virun build --target node --entry src/index.ts --module esm cjs --outdir dist",
     "build:esm": "virun build --target node --entry src/index.ts --module esm",
     "build:cjs": "virun build --target node --entry src/index.ts --module cjs",
     "build:preserve-modules": "virun build --target node --entry src/index.ts --preserve-modules --module esm cjs --outdir src",

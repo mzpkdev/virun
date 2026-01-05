@@ -5,9 +5,9 @@ import { Module } from "../core/Configuration"
 export const moduleOption = defineOption({
     name: "module",
     alias: "m",
-    description: "Output module format(s): esm, cjs, or both (comma-separated)",
+    description: "Output module format(s): es, cjs, or both",
     required: false,
-    defaultValue: (): Module[] => [ "esm" ],
+    defaultValue: (): Module[] => [ "es" ],
     parse: (...values: string[]): Module[] => {
         return values as Module[]
     }

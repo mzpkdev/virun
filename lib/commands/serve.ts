@@ -1,10 +1,9 @@
 import { defineCommand } from "cmdore"
-import { vite } from "../core/vite"
-// import * as vite from "../core/vite_2"
+import { vite } from "../core/vite.js"
 import { entryOption } from "../options/entry.js"
 import { portOption } from "../options/port.js"
 import { targetOption } from "../options/target.js"
-import { Configuration } from "../core/Configuration"
+import { Configuration } from "../core/Configuration.js"
 
 
 export const serveCommand = defineCommand({
