@@ -8,7 +8,7 @@ import { Configuration } from "../core/Configuration.js"
 
 export const serveCommand = defineCommand({
     name: "serve",
-    description: "Start development server with Hot Module Replacement",
+    description: "Start development server with HMR",
     examples: [
         "--target node",
         "--target browser",

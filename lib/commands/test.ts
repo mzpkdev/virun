@@ -7,7 +7,7 @@ import { filesOption } from "../options/files.js"
 
 export const testCommand = defineCommand({
     name: "test",
-    description: "Run tests using Vitest with coverage support",
+    description: "Run tests using vitest",
     examples: [
         "",
         "--watch",
