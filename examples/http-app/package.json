@@ -10,7 +10,7 @@
     "build:esm": "virun build --target node --entry src/index.ts --module es",
     "build:cjs": "virun build --target node --entry src/index.ts --module cjs",
     "build:preserve-modules": "virun build --target node --entry src/index.ts --preserve-modules --module es cjs --outdir build",
-    "clean": "virun clean --outdir dist",
+    "clean": "virun clean",
     "clean:preserve-modules": "virun clean --outdir src",
     "test": "virun test"
   },

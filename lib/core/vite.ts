@@ -1,11 +1,10 @@
 import { builtinModules } from "module"
-import { build as viteBuild, createServer, createViteRuntime, UserConfig, ViteDevServer, LibraryOptions } from "vite"
+import { build as viteBuild, createServer, createViteRuntime, UserConfig, ViteDevServer } from "vite"
 import dts from "vite-plugin-dts"
-import type { Configuration, Target } from "./Configuration.js"
 import path from "node:path"
-import fs from "node:fs"
 import { RollupOutput } from "rollup"
-import { it } from "vitest"
+import type { Configuration, Target } from "./Configuration.js"
+import { Metadata } from "./Metadata.js"
 
 
 const build = async (_target: Target, configuration: Configuration): Promise<void> => {
@@ -58,7 +57,12 @@ const build = async (_target: Target, configuration: Configuration): Promise<voi
         const [ { output: chunks } ] = await viteBuild({
             plugins: [ dts({
                 rollupTypes: false,
-                tsconfigPath: path.resolve(process.cwd(), "tsconfig.json")
+                tsconfigPath: path.resolve(process.cwd(), "tsconfig.json"),
+                afterBuild: (emitted) => {
+                    for (const filename of emitted.keys()) {
+                        output.add(filename)
+                    }
+                }
             }) ],
             build: {
                 ...build,
@@ -85,13 +89,13 @@ const build = async (_target: Target, configuration: Configuration): Promise<voi
             }
         }) as RollupOutput[]
         for (const chunk of chunks) {
-            output.add(chunk.fileName)
+            output.add(path.join(outDir!, chunk.fileName))
         }
     }
-    const buildinfo = {
-        output: Array.from(output),
-    }
-    fs.writeFileSync(path.resolve(process.cwd(), ".buildinfo"), JSON.stringify(buildinfo, null, 2))
+    await Metadata.save({
+        outdir: outDir!,
+        output: Array.from(output)
+    })
 }
 
 const serve = async (target: Target, configuration: Configuration): Promise<void> => {
