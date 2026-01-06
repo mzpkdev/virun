@@ -14,13 +14,12 @@ export type BuildConfiguration = {
     preserveModules: boolean
 }
 
-const build = async (_target: Target, configuration: BuildConfiguration): Promise<void> => {
+const build = async (target: Target, configuration: BuildConfiguration): Promise<void> => {
     const { entry, module, outdir, preserveModules } = configuration
 
     const build = {
         outDir: outdir,
         emptyOutDir: true,
-        target: "node18",
         sourcemap: true,
         rollupOptions: {
             external: (id: string) => {
@@ -38,65 +37,80 @@ const build = async (_target: Target, configuration: BuildConfiguration): Promis
         }
     }
 
-    if (!preserveModules) {
+    if (target == "browser") {
         await viteBuild({
-            plugins: [ dts({
-                rollupTypes: true,
-                tsconfigPath: path.resolve(process.cwd(), "tsconfig.json")
-            }) ],
             build: {
                 ...build,
+                rollupOptions: {}
+            }
+        })
+        return
+    }
+
+    const plugin = (rollupTypes: boolean) => dts({
+        rollupTypes: rollupTypes,
+        tsconfigPath: path.resolve(process.cwd(), "tsconfig.json"),
+        afterBuild: (emitted) => {
+            for (const filename of emitted.keys()) {
+                const normalized = path.relative(path.basename(outdir), filename)
+                output.add(path.join(outdir, normalized))
+            }
+        }
+    })
+
+    const output = new Set<string>()
+    if (!preserveModules) {
+        const [ { output: chunks } ] = await viteBuild({
+            plugins: [ plugin(true) ],
+            build: {
+                ...build,
+                target: "node18",
                 lib: {
                     entry: entry,
                     formats: module,
                     fileName: "index"
                 }
             }
-        })
-        return
-    }
-    const output = new Set<string>()
-    for (let i = 0; i < module.length; i++) {
-        const item = module[i]
-        const extension = item === "es"
-            ? ".mjs"
-            : ".js"
-        const [ { output: chunks } ] = await viteBuild({
-            plugins: [ dts({
-                rollupTypes: false,
-                tsconfigPath: path.resolve(process.cwd(), "tsconfig.json"),
-                afterBuild: (emitted) => {
-                    for (const filename of emitted.keys()) {
-                        output.add(filename)
-                    }
-                }
-            }) ],
-            build: {
-                ...build,
-                emptyOutDir: i == 0,
-                lib: {
-                    entry: entry,
-                    formats: [ item ]
-                },
-                rollupOptions: {
-                    ...build.rollupOptions,
-                    output: {
-                        format: item,
-                        preserveModules: true,
-                        preserveModulesRoot: "src",
-                        exports: "auto",
-                        entryFileNames: ({ name }) => {
-                            if (name.includes("node_modules")) {
-                                throw new Error("// TODO")
-                            }
-                            return `[name]${extension}`
-                        }
-                    }
-                }
-            }
         }) as RollupOutput[]
         for (const chunk of chunks) {
             output.add(path.join(outdir, chunk.fileName))
+        }
+    } else {
+        for (let i = 0; i < module.length; i++) {
+            const item = module[i]
+            const extension = item === "es"
+                ? ".mjs"
+                : ".js"
+            const [ { output: chunks } ] = await viteBuild({
+                plugins: [ plugin(false) ],
+                build: {
+                    ...build,
+                    target: "node18",
+                    emptyOutDir: i == 0,
+                    lib: {
+                        entry: entry,
+                        formats: [ item ]
+                    },
+                    rollupOptions: {
+                        ...build.rollupOptions,
+                        output: {
+                            format: item,
+                            preserveModules: true,
+                            preserveModulesRoot: "src",
+                            exports: "auto",
+                            entryFileNames: ({ name }) => {
+                                if (name.includes("node_modules")) {
+                                    throw new Error("// TODO")
+                                }
+                                return `[name]${extension}`
+                            }
+                        }
+                    }
+                }
+            }) as RollupOutput[]
+            for (const chunk of chunks) {
+                output.add(path.join(outdir, chunk.fileName))
+            }
         }
     }
     await Metadata.save({

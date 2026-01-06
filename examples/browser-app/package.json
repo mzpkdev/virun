@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "virun serve --target browser --entry index.html --port 3000",
     "build": "virun build --target browser --entry index.html --outdir dist",
-    "clean": "virun clean --outdir dist",
+    "clean": "virun clean",
     "test": "virun test"
   },
   "dependencies": {},
