@@ -7,10 +7,10 @@ export type Target = "node" | "browser"
 export type Module = "es" | "cjs"
 
 export type Configuration = {
-    root?: string
-    mode?: Mode
-    entry?: string
-    module?: Module[]
+    root: string
+    mode: Mode
+    entry: string
+    module: Module[]
     outDir?: string
     port?: number
     preserveModules?: boolean
@@ -66,10 +66,12 @@ export namespace Configuration {
             return {
                 root,
                 mode: this._mode,
-                entry: path.resolve(root, this._entry!),
+                module: this._module ?? [ "es" ],
+                entry: this._entry
+                    ? path.resolve(root, this._entry)
+                    : path.resolve(root, "src/index.ts"),
                 outDir: this._outDir,
                 port: this._port,
-                module: this._module,
                 preserveModules: this._preserveModules
             }
         }

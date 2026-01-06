@@ -66,16 +66,12 @@ const createViteBrowserConfiguration = async (configuration: Configuration): Pro
 
 
 const build = async (_target: Target, configuration: Configuration): Promise<void> => {
-    const { outDir, module = [ "es" ], preserveModules } = configuration
+    const { entry, module, outDir, preserveModules } = configuration
 
     const build = {
         outDir,
         emptyOutDir: true,
         target: "node18",
-        lib: {
-            entry: path.resolve(process.cwd(), "src/index.ts"),
-            formats: module
-        },
         rollupOptions: {
             external: (id: string) => {
                 if (/^node:.*/.test(id)) {
@@ -92,44 +88,50 @@ const build = async (_target: Target, configuration: Configuration): Promise<voi
         }
     }
 
-    if (preserveModules) {
-        for (let i = 0; i < module.length; i++) {
-            const item = module[i]
-            const extension = item === "es"
-                ? ".mjs"
-                : ".js"
-            await viteBuild({
-                build: {
-                    ...build,
-                    emptyOutDir: i == 0,
-                    lib: {
-                        entry: build.lib.entry,
-                        formats: [ item ]
-                    },
-                    rollupOptions: {
-                        ...build.rollupOptions,
-                        output: {
-                            format: item,
-                            preserveModules: true,
-                            preserveModulesRoot: "src",
-                            exports: "auto",
-                            entryFileNames: ({ name }) => {
-                                if (name.includes("node_modules")) {
-                                    throw new Error("// TODO")
-                                }
-                                return `[name]${extension}`
-                            }
-                        }
-                    }
+    if (!preserveModules) {
+        await viteBuild({
+            build: {
+                ...build,
+                lib: {
+                    entry,
+                    formats: module
                 }
-            })
-        }
+            }
+        })
         return
     }
 
-    await viteBuild({
-        build
-    })
+    for (let i = 0; i < module.length; i++) {
+        const item = module[i]
+        const extension = item === "es"
+            ? ".mjs"
+            : ".js"
+        await viteBuild({
+            build: {
+                ...build,
+                emptyOutDir: i == 0,
+                lib: {
+                    entry,
+                    formats: [ item ]
+                },
+                rollupOptions: {
+                    ...build.rollupOptions,
+                    output: {
+                        format: item,
+                        preserveModules: true,
+                        preserveModulesRoot: "src",
+                        exports: "auto",
+                        entryFileNames: ({ name }) => {
+                            if (name.includes("node_modules")) {
+                                throw new Error("// TODO")
+                            }
+                            return `[name]${extension}`
+                        }
+                    }
+                }
+            }
+        })
+    }
 }
 
 const serve = async (target: Target, configuration: Configuration): Promise<void> => {
