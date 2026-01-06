@@ -1,6 +1,6 @@
 import * as path from "node:path"
 import { builtinModules } from "module"
-import { build as viteBuild, createServer, createViteRuntime, UserConfig, ViteDevServer } from "vite"
+import { build as viteBuild, createServer, createViteRuntime, UserConfig, ViteDevServer, LibraryOptions } from "vite"
 import type { Configuration, Target } from "./Configuration.js"
 
 
@@ -38,6 +38,7 @@ const createViteNodeConfiguration = async (configuration: Configuration): Promis
                 preserveModules: true,
                 preserveModulesRoot: "src",
                 exports: "auto",
+                format: module?.[0] || "es",
                 entryFileNames: ({ name }) => {
                     if (name.includes("node_modules")) {
                         return "vendor/[name]-[hash].js"
@@ -96,17 +97,22 @@ const build = async (_target: Target, configuration: Configuration): Promise<voi
             const item = module[i]
             const extension = item === "es"
                 ? ".mjs"
-                : ".cjs"
+                : ".js"
             await viteBuild({
                 build: {
                     ...build,
                     emptyOutDir: i == 0,
+                    lib: {
+                        entry: (build.lib as LibraryOptions).entry,
+                        formats: [item]
+                    },
                     rollupOptions: {
                         ...build.rollupOptions,
                         output: {
                             preserveModules: true,
                             preserveModulesRoot: "src",
                             exports: "auto",
+                            format: item,
                             entryFileNames: ({ name }) => {
                                 if (name.includes("node_modules")) {
                                     throw new Error("// TODO")
