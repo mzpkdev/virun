@@ -3,6 +3,9 @@ import { build as viteBuild, createServer, createViteRuntime, UserConfig, ViteDe
 import dts from "vite-plugin-dts"
 import type { Configuration, Target } from "./Configuration.js"
 import path from "node:path"
+import fs from "node:fs"
+import { RollupOutput } from "rollup"
+import { it } from "vitest"
 
 
 const build = async (_target: Target, configuration: Configuration): Promise<void> => {
@@ -46,13 +49,13 @@ const build = async (_target: Target, configuration: Configuration): Promise<voi
         })
         return
     }
-
+    const output = new Set<string>()
     for (let i = 0; i < module.length; i++) {
         const item = module[i]
         const extension = item === "es"
             ? ".mjs"
             : ".js"
-        await viteBuild({
+        const [ { output: chunks } ] = await viteBuild({
             plugins: [ dts({
                 rollupTypes: false,
                 tsconfigPath: path.resolve(process.cwd(), "tsconfig.json")
@@ -80,8 +83,15 @@ const build = async (_target: Target, configuration: Configuration): Promise<voi
                     }
                 }
             }
-        })
+        }) as RollupOutput[]
+        for (const chunk of chunks) {
+            output.add(chunk.fileName)
+        }
     }
+    const buildinfo = {
+        output: Array.from(output),
+    }
+    fs.writeFileSync(path.resolve(process.cwd(), ".buildinfo"), JSON.stringify(buildinfo, null, 2))
 }
 
 const serve = async (target: Target, configuration: Configuration): Promise<void> => {
