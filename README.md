@@ -1,387 +1,277 @@
 <div align="center">
 
+# virun
+
+**Build Node.js & browser apps with one CLI. Zero config. Vite-powered.**
+
+[![npm version](https://img.shields.io/npm/v/virun.svg)](https://www.npmjs.com/package/virun)
 [![license](https://img.shields.io/npm/l/virun.svg)](https://github.com/mzpkdev/virun/blob/master/LICENSE)
-[![npm version](https://img.shields.io/npm/v/virun/v/0.0.2.svg)](https://www.npmjs.com/package/virun)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
-[![bundle size](https://img.shields.io/bundlephobia/min/virun)](https://bundlephobia.com/result?p=virun)
 
-</div>
-<br>
-<br>
-
-<p align="center">
-  <p align="center">
-    <strong>virun</strong> is an opinionated Vite-powered workflow tool for JavaScript and TypeScript projects <br>  
-      — use single CLI that works for both <em>Node.js</em> and <em>browser</em> applications
-    <br />
-    <br />
-    <a href="#how-to-use"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="https://github.com/mzpkdev/virun/issues">Report a bug</a>
-    &nbsp;&nbsp;·&nbsp;&nbsp;
-    <a href="https://github.com/mzpkdev/virun/issues">Request a feature</a>
-  </p>
-<br />
-<br />
-
-Table of Contents
-------------------
-
-* [Overview](#overview)
-    * [Why virun?](#why-virun)
-    * [Key Features](#key-features)
-* [Getting started](#getting-started)
-    * [How to install](#how-to-install)
-    * [How to use](#how-to-use)
-* [Commands](#commands)
-* [Examples](#examples)
-
-Overview
----------
-
-### Why virun?
-
-Tired of juggling multiple build tools and configurations for different project types? Development tooling doesn't have to be complicated.  
-Whether you're building a CLI tool, an HTTP server, or a modern web app, 
-`virun` gives you a unified workflow — with speed, sensible defaults, and zero fuss.
-
-You know what's best of all?  
-It **works** seamlessly for **Node.js** and **browser** projects with the same commands.
-
-### Key Features
-
-<div align="center">
-
-<table>
-  <tbody>
-    <tr>
-      <td>⚡ Lightning Fast</td>
-      <td>Powered by Vite for instant HMR in both Node.js and browser</td>
-    </tr>
-    <tr>
-      <td>🎯 Zero Config</td>
-      <td>Works out of the box with smart defaults, configure only when needed</td>
-    </tr>
-    <tr>
-      <td>📦 Unified Workflow</td>
-      <td>Same commands for Node.js and browser targets</td>
-    </tr>
-    <tr>
-      <td>💙 TypeScript</td>
-      <td>Full TypeScript support with automatic declaration generation</td>
-    </tr>
-    <tr>
-      <td>🔧 Flexible Output</td>
-      <td>ESM, CommonJS, or both — you choose the module format</td>
-    </tr>
-    <tr>
-      <td>🧪 Testing Ready</td>
-      <td>Vitest integration with watch mode built-in</td>
-    </tr>
-  </tbody>
-</table>     
+[Quick Start](#quick-start) · [Features](#features) · [Commands](#commands) · [Examples](#examples)
 
 </div>
 
-Getting started
-----------------
+---
 
-`virun` abstracts away Vite configuration, providing you with simple `build`, `serve`, and `test` commands.
-It handles the complexity behind the scenes — Vite for fast development, optimized bundling for production.
-You just focus on writing code, and it figures out the rest.
-
-### How to install
-
-```shell
-npm install --save-dev virun
-```
-
-Or install globally:
-
-```shell
-npm install -g virun
-```
-
-### How to use
-
-The simplest way to get started is to just run `virun` commands with a target.
-For Node.js projects, specify your entry point in `package.json` and run `build` or `serve`.
-For browser projects, create an `index.html` and you're ready to go.
-
-#### Node.js Project
-
-Add your entry point to `package.json`:
-
-```json
-{
-  "name": "my-app",
-  "type": "module",
-  "module": "src/index.ts"
-}
-```
-
-Build for production:
+## Quick Start
 
 ```bash
-virun build --target node
+npm install -D virun
 ```
 
-Or start the dev server with HMR:
+**Node.js** — start coding with HMR:
+```bash
+virun serve --target node --entry src/index.ts
+```
+
+**Browser** — spin up the dev server:
+```bash
+virun serve --target browser --port 3000
+```
+
+**Build for production:**
+```bash
+virun build --target node --outdir dist
+virun build --target browser --outdir dist
+```
+
+That's it. No config files needed.
+
+---
+
+## Why virun?
+
+Building JavaScript projects usually means choosing between specialized tools — one for bundling, one for TypeScript, one for Node.js, another for the browser. Each with its own config file and learning curve.
+
+**virun takes a different approach:**
+
+- **One CLI for everything** — same commands work for Node.js CLIs, HTTP servers, and browser apps
+- **Zero configuration** — sensible defaults that just work, configure only when you need to
+- **Vite under the hood** — lightning-fast HMR, even for Node.js development
 
 ```bash
-virun serve --target node
+# These all work the same way
+virun serve --target node      # Node.js app with HMR
+virun serve --target browser   # Browser app with HMR
+virun build --target node      # Production Node.js build
+virun build --target browser   # Production browser build
 ```
 
-> [!TIP]  
-> By default, `virun` outputs ESM format (`.mjs`). Use `--module` to configure CommonJS or both formats!
+---
 
-Want to build both ESM and CommonJS? Just specify both formats.  
-Need only CommonJS? Switch it with a flag.
+## Features
 
-And yes — you can configure it with CLI flags!
+### Unified Workflow
+Same commands, any target. Switch between Node.js and browser projects without learning new tools.
+
+### Lightning Fast
+Powered by Vite with instant Hot Module Reloading — yes, even for Node.js. TypeScript runs directly in development, no compilation step.
+
+### TypeScript First
+Full TypeScript support out of the box. Automatic `.d.ts` declaration generation on build.
+
+### Flexible Module Output
+Ship ESM, CommonJS, or both. One flag, no config files:
 
 ```bash
-# ESM only (default)
-virun build --target node --module es
-
-# CommonJS only
-virun build --target node --module cjs
-
-# Both formats
-virun build --target node --module es cjs
+virun build --target node --module es        # ESM only (default)
+virun build --target node --module cjs       # CommonJS only
+virun build --target node --module es cjs    # Both formats
 ```
 
-#### Browser Project
-
-Create an `index.html` in your project root:
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <title>My App</title>
-</head>
-<body>
-  <div id="app"></div>
-  <script type="module" src="/src/main.ts"></script>
-</body>
-</html>
-```
-
-Build for production:
+### Library Mode
+Building an npm package? Use `--preserve-modules` to compile each file separately, preserving your directory structure:
 
 ```bash
-virun build --target browser
+virun build --target node --preserve-modules --module es cjs
 ```
 
-Or start the dev server with HMR:
-
-```bash
-virun serve --target browser
+Your consumers can import exactly what they need:
+```javascript
+import { utils } from 'your-lib/utils'
+import { helpers } from 'your-lib/helpers'
 ```
 
-Use `virun test` to run your tests with Vitest!
+### Testing Ready
+Vitest integration with watch mode:
 
 ```bash
-# Run tests once (default)
-virun test
-
-# Watch mode
-virun test --watch
-
-# Run specific tests
+virun test              # Run once
+virun test --watch      # Watch mode
 virun test --files src/utils.test.ts
 ```
 
-All settings can be configured with CLI flags.
+---
 
-Commands
----------
+## Commands
 
 ### `virun build`
 
-Build your project for production with all optimizations enabled — minification, source maps, and TypeScript declarations.
+Build for production with optimizations — minification, source maps, and TypeScript declarations.
 
-**Options:**
-- `--target, -t` - Build target: `node` or `browser` (default: `node`)
-- `--entry, -e` - Entry point file path (default: `src/main.ts`)
-- `--outdir, -o` - Output directory (default: `dist`)
-- `--module, -m` - Output module format(s): `es`, `cjs`, or both (comma-separated). Only for `node` target. Default: `es`
-- `--preserve-modules, -p` - Build each file separately (library mode, like `tsc`). Preserves directory structure and outputs each `.ts` file as a separate `.js`/`.mjs` file. Only for `node` target.
-
-**Examples:**
+| Option | Alias | Description | Default |
+|--------|-------|-------------|---------|
+| `--target` | `-t` | `node` or `browser` | `node` |
+| `--entry` | `-e` | Entry point file | `src/main.ts` |
+| `--outdir` | `-o` | Output directory | `dist` |
+| `--module` | `-m` | Output format: `es`, `cjs`, or both | `es` |
+| `--preserve-modules` | | Compile files separately (library mode) | `false` |
 
 ```bash
-# Build Node.js app (ESM output, default)
-virun build --target node
-
-# Build browser app
-virun build --target browser
-
-# Build Node.js app with both ESM and CommonJS
-virun build --target node --module es cjs
-
-# Custom entry and output
-virun build --target node --entry src/cli.ts --outdir build
-
-# Build in library mode (preserve-modules) - each file built separately
+# Examples
+virun build --target node --module es cjs --outdir dist
+virun build --target browser --outdir dist
 virun build --target node --preserve-modules --module es cjs
-
-# Build library mode with output to src directory (like tsc)
-virun build --target node --preserve-modules --module es cjs --outdir src
 ```
-
-> [!NOTE]  
-> **Preserve-modules mode** is useful for building libraries where you want to preserve the original file structure. Each TypeScript file is compiled separately, similar to `tsc`. This mode is ideal when you want consumers of your library to import specific files rather than a single bundled entry point.
 
 ### `virun serve`
 
-Start development server with Hot Module Reloading for fast feedback loops.
+Start development server with Hot Module Reloading.
 
-**Options:**
-- `--target, -t` - Serve target: `node` or `browser` (default: `node`)
-- `--entry, -e` - Entry point file path (Node.js only, default: `src/main.ts`)
-- `--port, -p` - Dev server port (browser only, default: `5173`)
-
-**Examples:**
+| Option | Alias | Description | Default |
+|--------|-------|-------------|---------|
+| `--target` | `-t` | `node` or `browser` | `node` |
+| `--entry` | `-e` | Entry point (Node.js only) | `src/main.ts` |
+| `--port` | `-p` | Dev server port (browser only) | `5173` |
 
 ```bash
-# Serve Node.js app with HMR
-virun serve --target node
-
-# Serve browser app with HMR
-virun serve --target browser
-
-# Custom port for browser
-virun serve --target browser --port 3000
-
-# Custom entry point for Node.js
+# Examples
 virun serve --target node --entry src/server.ts
+virun serve --target browser --port 3000
 ```
 
 ### `virun test`
 
-Run tests using Vitest. Tests run once by default — use `--watch` to enable watch mode.
+Run tests with Vitest.
 
-**Options:**
-- `--watch, -w` - Run tests in watch mode (default: `false`)
-- `--files, -f` - Test file patterns (comma-separated, default: runs all test files)
-
-**Examples:**
+| Option | Alias | Description | Default |
+|--------|-------|-------------|---------|
+| `--watch` | `-w` | Watch mode | `false` |
+| `--files` | `-f` | Test file patterns | all tests |
 
 ```bash
-# Run tests once (default behavior)
+# Examples
 virun test
-
-# Run tests in watch mode
 virun test --watch
-
-# Run specific test file
-virun test --files src/utils.test.ts
-
-# Run multiple test files
 virun test --files src/utils.test.ts,src/helpers.test.ts
-
-# Combine options
-virun test --watch --files src/**/*.test.ts
 ```
 
 ### `virun clean`
 
-Remove build artifacts and output directories. Cleans generated files (`.js`, `.mjs`, `.d.ts` and their `.map` files) recorded during the last build.
-
-**Examples:**
+Remove build artifacts from the last build.
 
 ```bash
-# Clean build artifacts
 virun clean
 ```
 
-**Behavior:**
-- Removes all build artifacts recorded during the last build
-- Removes the entire output directory
-- Uses the .buildinfo file (created during build) to track what was built
+---
 
-Examples
----------
+## Use Cases
 
-Check out the [`examples/`](./examples/) directory for complete working examples!
+### CLI Tool
 
-### Available Examples
+Build command-line applications with hashbang support:
 
-**browser-app**  
-Browser application with HTML entry point demonstrating client-side development with HMR.
-
-**cli-app**  
-Node.js CLI tool showing how to build command-line applications with hashbang support.
-
-**http-app**  
-Node.js HTTP server demonstrating server-side development with hot reloading.
-
-All examples demonstrate usage with CLI flags.
-
-### Running Examples
-
-```bash
-# Browser app
-cd examples/browser-app
-npm run dev          # Start dev server
-npm run build        # Build for production
-npm test             # Run tests
-
-# CLI app
-cd examples/cli-app
-npm run dev          # Start with HMR
-npm run build        # Build for production
-npm test             # Run tests
-node dist/index.js   # Run production build
-
-# HTTP app
-cd examples/http-app
-npm run dev          # Start with HMR
-npm run build        # Build for production
-npm test             # Run tests
-node dist/index.js   # Run production server
+```json
+{
+  "bin": "dist/index.mjs",
+  "scripts": {
+    "dev": "virun serve --target node --entry src/index.ts",
+    "build": "virun build --target node --entry src/index.ts --outdir dist"
+  }
+}
 ```
 
-How It Works
--------------
+### HTTP Server
 
-### Node.js Target
+Develop backend services with hot reloading:
 
-- **Build**: Bundles your code and dependencies into module format(s):
-  - ESM format: `dist/index.mjs` (default)
-  - CommonJS format: `dist/index.js`
-  - Both formats: `dist/index.mjs` and `dist/index.js`
-- **Serve**: Uses Vite runtime to execute TypeScript directly with HMR
+```json
+{
+  "scripts": {
+    "dev": "virun serve --target node --entry src/server.ts",
+    "build": "virun build --target node --module es cjs --outdir dist"
+  }
+}
+```
 
-### Browser Target
+### Browser App
 
-- **Build**: Standard Vite production build from `index.html`
-- **Serve**: Vite dev server with HMR
+Standard frontend development with Vite's speed:
 
-Design Decisions
------------------
+```json
+{
+  "scripts": {
+    "dev": "virun serve --target browser --port 3000",
+    "build": "virun build --target browser --outdir dist"
+  }
+}
+```
 
-virun focuses on simplicity with smart defaults:
+### npm Library
 
-### Smart Defaults
-- ✅ **Build Mode**: Always generates source maps, minifies output, and creates TypeScript declarations
-- ✅ **Serve Mode**: No optimizations for faster development with HMR
+Publish packages with proper ESM/CJS support:
 
-### Core Principles
-- ✅ **Configurable Module Formats**: Choose ESM (`.mjs`), CommonJS (`.js`), or both (default: ESM)
-- ✅ **Bundle Everything**: All dependencies bundled (no externalization)
-- ✅ **Zero Configuration**: Works out of the box with sensible defaults
+```json
+{
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./utils": {
+      "import": "./dist/utils.mjs",
+      "require": "./dist/utils.js"
+    }
+  },
+  "scripts": {
+    "build": "virun build --target node --preserve-modules --module es cjs --outdir dist"
+  }
+}
+```
 
-Contributing
--------------
+---
+
+## Examples
+
+Check out the [`examples/`](./examples/) directory for complete working projects:
+
+| Example | Description |
+|---------|-------------|
+| **browser-app** | Browser SPA with HTML entry point and HMR |
+| **cli-app** | Node.js CLI tool with hashbang support |
+| **http-app** | Node.js HTTP server with hot reloading |
+
+```bash
+cd examples/cli-app
+npm install
+npm run dev     # Start with HMR
+npm run build   # Build for production
+npm test        # Run tests
+```
+
+---
+
+## How It Works
+
+**Node.js target:**
+- **Build** — Bundles code into ESM (`.mjs`), CommonJS (`.js`), or both
+- **Serve** — Uses Vite runtime to execute TypeScript directly with HMR
+
+**Browser target:**
+- **Build** — Standard Vite production build from `index.html`
+- **Serve** — Vite dev server with HMR
+
+**All builds include:** source maps, minification, TypeScript declarations.
+
+---
+
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-Related Projects
------------------
+## Related
 
-- [Vite](https://vitejs.dev/) - Next generation frontend tooling
-- [cmdore](https://github.com/mzpkdev/cmdore) - CLI framework used by virun
+- [Vite](https://vitejs.dev/) — Next generation frontend tooling
+- [cmdore](https://github.com/mzpkdev/cmdore) — CLI framework used by virun
