@@ -6,16 +6,19 @@
   "module": "src/index.ts",
   "scripts": {
     "dev": "virun serve --target node --entry src/index.ts --port 3000",
-    "build": "virun build --target node --entry src/index.ts --module esm cjs --outdir dist",
-    "build:esm": "virun build --target node --entry src/index.ts --module esm",
+    "build": "virun build --target node --entry src/index.ts --module es cjs --outdir dist",
+    "build:esm": "virun build --target node --entry src/index.ts --module es",
     "build:cjs": "virun build --target node --entry src/index.ts --module cjs",
-    "build:preserve-modules": "virun build --target node --entry src/index.ts --preserve-modules --module esm cjs --outdir src",
+    "build:preserve-modules": "virun build --target node --entry src/index.ts --preserve-modules --module es cjs --outdir build",
     "clean": "virun clean --outdir dist",
     "clean:preserve-modules": "virun clean --outdir src",
     "test": "virun test"
   },
-  "dependencies": {},
+  "dependencies": {
+    "lodash": "^4.17.21"
+  },
   "devDependencies": {
+    "@types/lodash": "^4.17.21",
     "virun": "file:../.."
   }
 }

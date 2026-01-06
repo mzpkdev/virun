@@ -27,7 +27,7 @@ export namespace Configuration {
     export class Builder {
         private readonly _mode: Mode
         private _entry?: string
-        private _outdir?: string
+        private _outDir?: string
         private _port?: number
         private _module?: Module[]
         private _preserveModules?: boolean
@@ -41,8 +41,8 @@ export namespace Configuration {
             return this
         }
 
-        outdir(value: string): this {
-            this._outdir = value
+        outDir(value: string): this {
+            this._outDir = value
             return this
         }
 
@@ -56,13 +56,18 @@ export namespace Configuration {
             return this
         }
 
+        preserveModules(value: boolean): this {
+            this._preserveModules = value
+            return this
+        }
+
         async build(): Promise<Configuration> {
             const root = await findProjectRoot()
             return {
                 root,
                 mode: this._mode,
                 entry: path.resolve(root, this._entry!),
-                outDir: this._outdir,
+                outDir: this._outDir,
                 port: this._port,
                 module: this._module,
                 preserveModules: this._preserveModules

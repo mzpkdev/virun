@@ -4,9 +4,11 @@ import { formatDate, getGreeting } from "./utils"
 import { log, logError } from "./logger"
 import { createCorsHandler } from "./middleware/cors"
 import { handleApiRequest, handleHealthCheck } from "./routes/api"
-
+import _ from "lodash"
 
 const { port: PORT, host: HOST } = getConfig()
+
+console.log(_.add(1, 1))
 
 const cors = createCorsHandler({ origin: "*", methods: ["GET", "POST"] })
 
