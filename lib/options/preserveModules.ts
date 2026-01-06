@@ -2,7 +2,7 @@ import { defineOption } from "cmdore"
 
 export const preserveModulesOption = defineOption({
     name: "preserve-modules",
-    description: "Preserve module structure instead of bundling",
+    description: "Preserve module structure instead of bundling (library mode)",
     required: false,
     defaultValue: (): boolean => false,
     parse: (): boolean => {

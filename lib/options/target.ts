@@ -5,7 +5,7 @@ import type { Target } from "../core/Configuration"
 export const targetOption = defineOption({
     name: "target",
     alias: "t",
-    description: "Build target: node or browser",
+    description: "Target environment: node or browser",
     required: false,
     defaultValue: (): Target => "node",
     parse: (value: string): Target => {

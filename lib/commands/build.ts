@@ -10,11 +10,12 @@ import { Configuration } from "../core/Configuration.js"
 
 export const buildCommand = defineCommand({
     name: "build",
-    description: "Build project for production",
+    description: "Build project for production with optimizations",
     examples: [
         "--target node",
         "--target browser",
         "--target node --entry src/main.ts",
+        "--target node --module es cjs",
         "--target node --preserve-modules"
     ],
     options: [ targetOption, entryOption, outdirOption, moduleOption, preserveModulesOption ],

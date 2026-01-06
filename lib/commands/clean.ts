@@ -6,8 +6,10 @@ import { Metadata } from "../core/Metadata.js"
 
 export const cleanCommand = defineCommand({
     name: "clean",
-    description: "",
-    examples: [],
+    description: "Remove build artifacts and output directories",
+    examples: [
+        ""
+    ],
     options: [],
     run: async function* () {
         const metadata = await Metadata.load()

@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "module": "src/index.ts",
   "scripts": {
-    "dev": "virun serve --target node --entry src/index.ts --port 3000",
+    "dev": "virun serve --target node --entry src/index.ts",
     "build": "virun build --target node --entry src/index.ts --module es cjs --outdir dist",
     "build:esm": "virun build --target node --entry src/index.ts --module es",
     "build:cjs": "virun build --target node --entry src/index.ts --module cjs",

@@ -4,7 +4,7 @@ import { defineOption } from "cmdore"
 export const portOption = defineOption({
     name: "port",
     alias: "p",
-    description: "Dev server port",
+    description: "Dev server port (browser target only)",
     required: true,
     parse: (value: string): number => {
         const port = parseInt(value, 10)

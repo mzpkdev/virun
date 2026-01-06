@@ -1,7 +1,7 @@
 <div align="center">
 
 [![license](https://img.shields.io/npm/l/virun.svg)](https://github.com/mzpkdev/virun/blob/master/LICENSE)
-[![npm version](https://img.shields.io/npm/v/virun.svg)](https://www.npmjs.com/package/virun)
+[![npm version](https://img.shields.io/npm/v/virun/v/0.0.2.svg)](https://www.npmjs.com/package/virun)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![bundle size](https://img.shields.io/bundlephobia/min/virun)](https://bundlephobia.com/result?p=virun)
 
@@ -35,7 +35,6 @@ Table of Contents
     * [How to install](#how-to-install)
     * [How to use](#how-to-use)
 * [Commands](#commands)
-* [Configuration](#configuration)
 * [Examples](#examples)
 
 Overview
@@ -78,7 +77,7 @@ It **works** seamlessly for **Node.js** and **browser** projects with the same c
     </tr>
     <tr>
       <td>🧪 Testing Ready</td>
-      <td>Vitest integration with coverage and watch mode built-in</td>
+      <td>Vitest integration with watch mode built-in</td>
     </tr>
   </tbody>
 </table>     
@@ -140,17 +139,17 @@ virun serve --target node
 Want to build both ESM and CommonJS? Just specify both formats.  
 Need only CommonJS? Switch it with a flag.
 
-And yes — you can configure it in a config file too!
+And yes — you can configure it with CLI flags!
 
 ```bash
 # ESM only (default)
-virun build --target node --module esm
+virun build --target node --module es
 
 # CommonJS only
 virun build --target node --module cjs
 
 # Both formats
-virun build --target node --module esm cjs
+virun build --target node --module es cjs
 ```
 
 #### Browser Project
@@ -191,31 +190,11 @@ virun test
 # Watch mode
 virun test --watch
 
-# With coverage
-virun test --coverage
-
-# With UI
-virun test --ui
+# Run specific tests
+virun test --files src/utils.test.ts
 ```
 
-Need to customize? Create a `virun.config.js` file!
-
-```javascript
-module.exports = {
-    entry: "src/main.ts",
-    outdir: "dist",
-    port: 5173,
-    module: ["esm", "cjs"],
-    preserveModules: false,
-    test: {
-        watch: false,
-        coverage: false,
-        ui: false
-    }
-}
-```
-
-All settings in the config file can be overridden with CLI flags.
+All settings can be configured with CLI flags.
 
 Commands
 ---------
@@ -226,9 +205,9 @@ Build your project for production with all optimizations enabled — minificatio
 
 **Options:**
 - `--target, -t` - Build target: `node` or `browser` (default: `node`)
-- `--entry, -e` - Entry point file path (default: `src/main.ts` or from config)
-- `--outdir, -o` - Output directory (default: `dist` or from config)
-- `--module, -m` - Output module format(s): `esm`, `cjs`, or both (comma-separated). Only for `node` target. Default: `esm`
+- `--entry, -e` - Entry point file path (default: `src/main.ts`)
+- `--outdir, -o` - Output directory (default: `dist`)
+- `--module, -m` - Output module format(s): `es`, `cjs`, or both (comma-separated). Only for `node` target. Default: `es`
 - `--preserve-modules, -p` - Build each file separately (library mode, like `tsc`). Preserves directory structure and outputs each `.ts` file as a separate `.js`/`.mjs` file. Only for `node` target.
 
 **Examples:**
@@ -241,16 +220,16 @@ virun build --target node
 virun build --target browser
 
 # Build Node.js app with both ESM and CommonJS
-virun build --target node --module esm cjs
+virun build --target node --module es cjs
 
 # Custom entry and output
 virun build --target node --entry src/cli.ts --outdir build
 
 # Build in library mode (preserve-modules) - each file built separately
-virun build --target node --preserve-modules --module esm cjs
+virun build --target node --preserve-modules --module es cjs
 
 # Build library mode with output to src directory (like tsc)
-virun build --target node --preserve-modules --module esm cjs --outdir src
+virun build --target node --preserve-modules --module es cjs --outdir src
 ```
 
 > [!NOTE]  
@@ -262,8 +241,8 @@ Start development server with Hot Module Reloading for fast feedback loops.
 
 **Options:**
 - `--target, -t` - Serve target: `node` or `browser` (default: `node`)
-- `--entry, -e` - Entry point file path (Node.js only, default: `src/main.ts` or from config)
-- `--port, -p` - Dev server port (browser only, default: `5173` or from config)
+- `--entry, -e` - Entry point file path (Node.js only, default: `src/main.ts`)
+- `--port, -p` - Dev server port (browser only, default: `5173`)
 
 **Examples:**
 
@@ -286,11 +265,8 @@ virun serve --target node --entry src/server.ts
 Run tests using Vitest. Tests run once by default — use `--watch` to enable watch mode.
 
 **Options:**
-- `--watch, -w` - Run tests in watch mode (default: `false` or from config)
-- `--coverage, -c` - Collect coverage information (default: `false` or from config)
-- `--ui` - Start Vitest UI (default: `false` or from config)
-- `--reporter, -r` - Reporter to use (default: from config if set)
-- `--files, -f` - Test file patterns (comma-separated, default: from config if set)
+- `--watch, -w` - Run tests in watch mode (default: `false`)
+- `--files, -f` - Test file patterns (comma-separated, default: runs all test files)
 
 **Examples:**
 
@@ -301,128 +277,31 @@ virun test
 # Run tests in watch mode
 virun test --watch
 
-# Run with coverage
-virun test --coverage
-
-# Run with UI
-virun test --ui
-
 # Run specific test file
 virun test --files src/utils.test.ts
 
+# Run multiple test files
+virun test --files src/utils.test.ts,src/helpers.test.ts
+
 # Combine options
-virun test --watch --coverage --reporter verbose
+virun test --watch --files src/**/*.test.ts
 ```
 
 ### `virun clean`
 
-Remove build artifacts (similar to `tsc --build --clean`). Cleans generated files (`.js`, `.mjs`, `.d.ts` and their `.map` files) from the output directory without removing source files.
-
-**Options:**
-- `--outdir, -o` - Output directory to clean (default: `dist` or from config)
+Remove build artifacts and output directories. Cleans generated files (`.js`, `.mjs`, `.d.ts` and their `.map` files) recorded during the last build.
 
 **Examples:**
 
 ```bash
-# Clean default output directory (dist)
+# Clean build artifacts
 virun clean
-
-# Clean artifacts in src directory (preserve-modules mode)
-virun clean --outdir src
-
-# Clean artifacts in custom output directory
-virun clean --outdir build
 ```
 
 **Behavior:**
-- **When cleaning a directory with TypeScript source files** (e.g., `src` with preserve-modules): Removes only artifacts that correspond to existing `.ts`/`.tsx` source files, preserving the directory structure
-- **When cleaning a separate output directory** (e.g., `dist`): Removes all build artifacts and the empty directory itself
-
-Configuration
---------------
-
-You can configure `virun` using a `virun.config.js` file in your project root. This allows you to set default values for common options, which can still be overridden by CLI flags.
-
-### Configuration File
-
-Create a `virun.config.js` file:
-
-```javascript
-module.exports = {
-    entry: "src/main.ts",        // Entry point file path
-    outdir: "dist",              // Output directory
-    port: 5173,                  // Dev server port (browser)
-    module: ["esm", "cjs"],      // Output format(s) for node: "esm", "cjs", or both
-    preserveModules: false,      // Build each file separately (library mode, like tsc)
-    test: {
-        watch: false,            // Run tests in watch mode
-        coverage: false,         // Collect coverage
-        ui: false,               // Start Vitest UI
-        reporter: "verbose",     // Reporter to use
-        files: ["src/**/*.test.ts"] // Test file patterns
-    }
-}
-```
-
-**Priority Order:**
-1. CLI flags (highest priority) - Always override config file
-2. Config file values - Used when CLI flags are not provided
-3. Default values (lowest priority) - Used when neither CLI flags nor config file values are set
-
-### Module Format Configuration
-
-For Node.js targets, configure the output module format to match your needs.
-
-Output only ESM format (`.mjs`):
-```javascript
-module.exports = {
-    module: ["esm"]
-}
-```
-
-Output only CommonJS format (`.js`):
-```javascript
-module.exports = {
-    module: ["cjs"]
-}
-```
-
-Output both formats:
-```javascript
-module.exports = {
-    module: ["esm", "cjs"]
-}
-```
-
-### Preserve Modules Configuration
-
-Enable library mode to build each file separately (similar to `tsc`), preserving directory structure:
-
-```javascript
-module.exports = {
-    preserveModules: true,
-    module: ["esm", "cjs"],
-    outdir: "src"  // Output artifacts alongside source files
-}
-```
-
-When `preserveModules` is enabled:
-- Each `.ts` file is compiled separately into `.js`/`.mjs` files
-- Directory structure is preserved
-- Useful for libraries where consumers import specific files
-- Can output artifacts to `src` directory (like `tsc`) or a separate directory
-
-### Project Structure
-
-```
-my-project/
-├── package.json          # Project metadata
-├── virun.config.js       # Optional configuration file
-├── src/
-│   └── index.ts          # Your source code
-├── dist/                 # Build output (generated)
-└── index.html            # Required for browser target
-```
+- Removes all build artifacts recorded during the last build
+- Removes the entire output directory
+- Uses the .buildinfo file (created during build) to track what was built
 
 Examples
 ---------
@@ -440,7 +319,7 @@ Node.js CLI tool showing how to build command-line applications with hashbang su
 **http-app**  
 Node.js HTTP server demonstrating server-side development with hot reloading.
 
-All examples include `virun.config.js` files showing configuration file usage.
+All examples demonstrate usage with CLI flags.
 
 ### Running Examples
 
@@ -471,7 +350,7 @@ How It Works
 
 ### Node.js Target
 
-- **Build**: Bundles your code and dependencies into module format(s) based on configuration:
+- **Build**: Bundles your code and dependencies into module format(s):
   - ESM format: `dist/index.mjs` (default)
   - CommonJS format: `dist/index.js`
   - Both formats: `dist/index.mjs` and `dist/index.js`
