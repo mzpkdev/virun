@@ -9,9 +9,9 @@ export type Module = "es" | "cjs"
 export type Configuration = {
     root: string
     mode: Mode
-    entry: string
-    module: Module[]
-    outDir?: string
+    entry?: string
+    module?: Module[]
+    outdir?: string
     port?: number
     preserveModules?: boolean
     test?: {
@@ -27,7 +27,7 @@ export namespace Configuration {
     export class Builder {
         private readonly _mode: Mode
         private _entry?: string
-        private _outDir?: string
+        private _outdir?: string
         private _port?: number
         private _module?: Module[]
         private _preserveModules?: boolean
@@ -42,7 +42,7 @@ export namespace Configuration {
         }
 
         outDir(value: string): this {
-            this._outDir = value
+            this._outdir = value
             return this
         }
 
@@ -70,7 +70,7 @@ export namespace Configuration {
                 entry: this._entry
                     ? path.resolve(root, this._entry)
                     : path.resolve(root, "src/index.ts"),
-                outDir: this._outDir,
+                outdir: this._outdir,
                 port: this._port,
                 preserveModules: this._preserveModules
             }

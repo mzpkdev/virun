@@ -1,5 +1,5 @@
 import { defineCommand } from "cmdore"
-import { vite } from "../core/vite.js"
+import { BuildConfiguration, vite } from "../core/vite.js"
 import { entryOption } from "../options/entry.js"
 import { outdirOption } from "../options/outdir.js"
 import { targetOption } from "../options/target.js"
@@ -26,7 +26,7 @@ export const buildCommand = defineCommand({
             .module(module)
             .preserveModules(preserveModules)
             .build()
-        await vite.build(target, configuration)
+        await vite.build(target, configuration as BuildConfiguration)
         return 0
     }
 })

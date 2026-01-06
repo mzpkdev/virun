@@ -1,5 +1,5 @@
 import { defineCommand } from "cmdore"
-import { vite } from "../core/vite.js"
+import { ServeConfiguration, vite } from "../core/vite.js"
 import { entryOption } from "../options/entry.js"
 import { portOption } from "../options/port.js"
 import { targetOption } from "../options/target.js"
@@ -21,7 +21,7 @@ export const serveCommand = defineCommand({
             .entry(entry)
             .port(port)
             .build()
-        await vite.serve(target, configuration)
+        await vite.serve(target, configuration as ServeConfiguration)
         return 0
     }
 })

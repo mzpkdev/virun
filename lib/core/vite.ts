@@ -3,15 +3,22 @@ import { build as viteBuild, createServer, createViteRuntime, UserConfig, ViteDe
 import dts from "vite-plugin-dts"
 import path from "node:path"
 import { RollupOutput } from "rollup"
-import type { Configuration, Target } from "./Configuration.js"
+import { Configuration, Module, Target } from "./Configuration.js"
 import { Metadata } from "./Metadata.js"
 
 
-const build = async (_target: Target, configuration: Configuration): Promise<void> => {
-    const { entry, module, outDir, preserveModules } = configuration
+export type BuildConfiguration = {
+    entry: string
+    module: Module[]
+    outdir: string
+    preserveModules: boolean
+}
+
+const build = async (_target: Target, configuration: BuildConfiguration): Promise<void> => {
+    const { entry, module, outdir, preserveModules } = configuration
 
     const build = {
-        outDir,
+        outDir: outdir,
         emptyOutDir: true,
         target: "node18",
         sourcemap: true,
@@ -40,7 +47,7 @@ const build = async (_target: Target, configuration: Configuration): Promise<voi
             build: {
                 ...build,
                 lib: {
-                    entry,
+                    entry: entry,
                     formats: module,
                     fileName: "index"
                 }
@@ -68,7 +75,7 @@ const build = async (_target: Target, configuration: Configuration): Promise<voi
                 ...build,
                 emptyOutDir: i == 0,
                 lib: {
-                    entry,
+                    entry: entry,
                     formats: [ item ]
                 },
                 rollupOptions: {
@@ -89,16 +96,20 @@ const build = async (_target: Target, configuration: Configuration): Promise<voi
             }
         }) as RollupOutput[]
         for (const chunk of chunks) {
-            output.add(path.join(outDir!, chunk.fileName))
+            output.add(path.join(outdir, chunk.fileName))
         }
     }
     await Metadata.save({
-        outdir: outDir!,
+        outdir: outdir,
         output: Array.from(output)
     })
 }
 
-const serve = async (target: Target, configuration: Configuration): Promise<void> => {
+export type ServeConfiguration = {
+    entry: string
+}
+
+const serve = async (target: Target, configuration: ServeConfiguration): Promise<void> => {
     const viteConfiguration: UserConfig = {}
     let server: ViteDevServer | null = null
     try {
