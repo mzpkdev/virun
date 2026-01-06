@@ -68,7 +68,7 @@ const createViteBrowserConfiguration = async (configuration: Configuration): Pro
 const build = async (_target: Target, configuration: Configuration): Promise<void> => {
     const { outDir, module = [ "es" ], preserveModules } = configuration
 
-    const build: UserConfig["build"] = {
+    const build = {
         outDir,
         emptyOutDir: true,
         target: "node18",
@@ -103,16 +103,16 @@ const build = async (_target: Target, configuration: Configuration): Promise<voi
                     ...build,
                     emptyOutDir: i == 0,
                     lib: {
-                        entry: (build.lib as LibraryOptions).entry,
-                        formats: [item]
+                        entry: build.lib.entry,
+                        formats: [ item ]
                     },
                     rollupOptions: {
                         ...build.rollupOptions,
                         output: {
+                            format: item,
                             preserveModules: true,
                             preserveModulesRoot: "src",
                             exports: "auto",
-                            format: item,
                             entryFileNames: ({ name }) => {
                                 if (name.includes("node_modules")) {
                                     throw new Error("// TODO")
