@@ -141,10 +141,15 @@ const build = async (target: Target, configuration: BuildConfiguration): Promise
 
 export type ServeConfiguration = {
     entry: string
+    port?: number
 }
 
-const serve = async (target: Target, configuration: ServeConfiguration): Promise<void> => {
-    const viteConfiguration: UserConfig = {}
+const serve = async (target: Target, { entry, port }: ServeConfiguration): Promise<void> => {
+    const viteConfiguration: UserConfig = {
+        server: {
+            port
+        }
+    }
     let server: ViteDevServer | null = null
     try {
         server = await createServer(viteConfiguration)
@@ -155,7 +160,7 @@ const serve = async (target: Target, configuration: ServeConfiguration): Promise
         switch (target) {
             case "node":
                 const runtime = await createViteRuntime(server)
-                await runtime.executeUrl(configuration.entry!)
+                await runtime.executeUrl(entry)
                 cleanup = async () => {
                     await runtime.destroy()
                     await server?.close()

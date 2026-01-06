@@ -1,6 +1,6 @@
 {
   "name": "virun",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Opinionated Vite-powered workflow tool",
   "type": "module",
   "main": "./build/main.js",
@@ -10,6 +10,7 @@
   },
   "scripts": {
     "build": "tsc --outDir build",
+    "typecheck": "virun typecheck",
     "preprepare": "ts-patch install",
     "prepack": "npm run build"
   },
@@ -18,12 +19,12 @@
     "jsdom": "^24.0.0",
     "vite": "~5.1.0",
     "vite-plugin-dts": "^3.0.1",
-    "vitest": "^1.6.0"
+    "vitest": "^1.6.0",
+    "typescript": "^5.9.3"
   },
   "devDependencies": {
     "@types/node": "^22.4.0",
     "ts-patch": "^3.2.1",
-    "typescript": "^5.5.4",
     "typescript-transform-paths": "^3.4.11"
   },
   "author": "Mateusz Pietrzak",

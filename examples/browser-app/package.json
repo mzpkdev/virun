@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "virun serve --target browser --port 3000",
-    "build": "virun build --target browser --outdir dist",
+    "serve": "virun serve --entry index.html --target browser --port 3000",
+    "build": "virun build --entry index.html --target browser --outdir dist",
     "clean": "virun clean",
-    "test": "virun test"
+    "test": "virun test",
+    "typecheck": "virun typecheck"
   },
   "dependencies": {},
   "devDependencies": {

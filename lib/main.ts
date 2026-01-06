@@ -3,6 +3,7 @@ import { buildCommand } from "./commands/build.js"
 import { serveCommand } from "./commands/serve.js"
 import { testCommand } from "./commands/test.js"
 import { cleanCommand } from "./commands/clean.js"
+import { typecheckCommand } from "./commands/typecheck.js"
 
 
 export const main = async (...varargs: string[]): Promise<number> => {
@@ -12,6 +13,7 @@ export const main = async (...varargs: string[]): Promise<number> => {
         .register(serveCommand as any)
         .register(testCommand as any)
         .register(cleanCommand as any)
+        .register(typecheckCommand as any)
     await program.execute(varargs)
     return 0
 }
