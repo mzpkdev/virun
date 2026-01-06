@@ -4,67 +4,6 @@ import { build as viteBuild, createServer, createViteRuntime, UserConfig, ViteDe
 import type { Configuration, Target } from "./Configuration.js"
 
 
-const createViteNodeConfiguration = async (configuration: Configuration): Promise<UserConfig> => {
-    const { outDir, module, preserveModules } = configuration
-
-    const build: UserConfig["build"] = {
-        outDir,
-        emptyOutDir: true,
-        target: "node18",
-        lib: {
-            entry: path.resolve(process.cwd(), "src/index.ts"),
-            formats: module
-        },
-        rollupOptions: {
-            external: (id: string) => {
-                if (/^node:.*/.test(id)) {
-                    return true
-                }
-                if (builtinModules.includes(id)) {
-                    return true
-                }
-                if (import.meta.resolve(id).includes("node_modules")) {
-                    return true
-                }
-                return false
-            }
-        }
-    }
-
-    if (preserveModules) {
-        build.rollupOptions = {
-            ...build.rollupOptions,
-            output: {
-                preserveModules: true,
-                preserveModulesRoot: "src",
-                exports: "auto",
-                format: module?.[0] || "es",
-                entryFileNames: ({ name }) => {
-                    if (name.includes("node_modules")) {
-                        return "vendor/[name]-[hash].js"
-                    }
-                    return "[name].js"
-                }
-            }
-        }
-    }
-
-    return {
-        build
-    }
-}
-
-const createViteBrowserConfiguration = async (configuration: Configuration): Promise<UserConfig> => {
-    const { outDir } = configuration
-    return {
-        build: {
-            outDir,
-            emptyOutDir: true
-        }
-    }
-}
-
-
 const build = async (_target: Target, configuration: Configuration): Promise<void> => {
     const { entry, module, outDir, preserveModules } = configuration
 
@@ -135,9 +74,7 @@ const build = async (_target: Target, configuration: Configuration): Promise<voi
 }
 
 const serve = async (target: Target, configuration: Configuration): Promise<void> => {
-    const viteConfiguration = target == "node"
-        ? await createViteNodeConfiguration(configuration)
-        : await createViteBrowserConfiguration(configuration)
+    const viteConfiguration: UserConfig = {}
     let server: ViteDevServer | null = null
     try {
         server = await createServer(viteConfiguration)
