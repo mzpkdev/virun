@@ -5,6 +5,7 @@ import path from "node:path"
 import { RollupOutput } from "rollup"
 import { Configuration, Module, Target } from "./Configuration.js"
 import { Metadata } from "./Metadata.js"
+import { BuildError } from "../errors.js"
 
 
 export type BuildConfiguration = {
@@ -38,12 +39,16 @@ const build = async (target: Target, configuration: BuildConfiguration): Promise
     }
 
     if (target == "browser") {
-        await viteBuild({
-            build: {
-                ...build,
-                rollupOptions: {}
-            }
-        })
+        try {
+            await viteBuild({
+                build: {
+                    ...build,
+                    rollupOptions: {}
+                }
+            })
+        } catch (error) {
+            throw new BuildError("build", "Browser build failed. Check your entry point and configuration.", error)
+        }
         return
     }
 
@@ -60,18 +65,24 @@ const build = async (target: Target, configuration: BuildConfiguration): Promise
 
     const output = new Set<string>()
     if (!preserveModules) {
-        const [ { output: chunks } ] = await viteBuild({
-            plugins: [ plugin(true) ],
-            build: {
-                ...build,
-                target: "node18",
-                lib: {
-                    entry: entry,
-                    formats: module,
-                    fileName: "index"
+        let chunks: RollupOutput["output"]
+        try {
+            const [result] = await viteBuild({
+                plugins: [ plugin(true) ],
+                build: {
+                    ...build,
+                    target: "node18",
+                    lib: {
+                        entry: entry,
+                        formats: module,
+                        fileName: "index"
+                    }
                 }
-            }
-        }) as RollupOutput[]
+            }) as RollupOutput[]
+            chunks = result.output
+        } catch (error) {
+            throw new BuildError("build", `Node.js build failed for entry "${entry}". Check TypeScript errors above.`, error)
+        }
         for (const chunk of chunks) {
             output.add(path.join(outdir, chunk.fileName))
         }
@@ -81,33 +92,42 @@ const build = async (target: Target, configuration: BuildConfiguration): Promise
             const extension = item === "es"
                 ? ".mjs"
                 : ".js"
-            const [ { output: chunks } ] = await viteBuild({
-                plugins: [ plugin(false) ],
-                build: {
-                    ...build,
-                    target: "node18",
-                    emptyOutDir: i == 0,
-                    lib: {
-                        entry: entry,
-                        formats: [ item ]
-                    },
-                    rollupOptions: {
-                        ...build.rollupOptions,
-                        output: {
-                            format: item,
-                            preserveModules: true,
-                            preserveModulesRoot: "src",
-                            exports: "auto",
-                            entryFileNames: ({ name }) => {
-                                if (name.includes("node_modules")) {
-                                    throw new Error("// TODO")
+            let chunks: RollupOutput["output"]
+            try {
+                const [result] = await viteBuild({
+                    plugins: [ plugin(false) ],
+                    build: {
+                        ...build,
+                        target: "node18",
+                        emptyOutDir: i == 0,
+                        lib: {
+                            entry: entry,
+                            formats: [ item ]
+                        },
+                        rollupOptions: {
+                            ...build.rollupOptions,
+                            output: {
+                                format: item,
+                                preserveModules: true,
+                                preserveModulesRoot: "src",
+                                exports: "auto",
+                                entryFileNames: ({ name }) => {
+                                    if (name.includes("node_modules")) {
+                                        throw new BuildError("build", `Cannot include node_modules in preserved module output. External dependency detected: ${name}`)
+                                    }
+                                    return `[name]${extension}`
                                 }
-                                return `[name]${extension}`
                             }
                         }
                     }
+                }) as RollupOutput[]
+                chunks = result.output
+            } catch (error) {
+                if (error instanceof BuildError) {
+                    throw error
                 }
-            }) as RollupOutput[]
+                throw new BuildError("build", `Build failed for module format "${item}". Check TypeScript errors above.`, error)
+            }
             for (const chunk of chunks) {
                 output.add(path.join(outdir, chunk.fileName))
             }
@@ -154,7 +174,7 @@ const serve = async (target: Target, configuration: ServeConfiguration): Promise
         if (server) {
             await server.close()
         }
-        throw error
+        throw new BuildError("serve", "Failed to start development server. Check port availability and configuration.", error)
     }
 }
 

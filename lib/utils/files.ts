@@ -1,5 +1,6 @@
 import * as fs from "node:fs/promises"
 import * as path from "node:path"
+import { FileSystemError } from "../errors.js"
 
 /**
  * Recursively find all TypeScript files in a directory
@@ -8,13 +9,18 @@ import * as path from "node:path"
  */
 export async function findTypeScriptFiles(directory: string): Promise<string[]> {
     const files: string[] = []
-    
+
     async function walk(dir: string): Promise<void> {
-        const entries = await fs.readdir(dir, { withFileTypes: true })
-        
+        let entries
+        try {
+            entries = await fs.readdir(dir, { withFileTypes: true })
+        } catch (error) {
+            throw new FileSystemError("Failed to read directory", dir, error)
+        }
+
         for (const entry of entries) {
             const fullPath = path.join(dir, entry.name)
-            
+
             if (entry.isDirectory()) {
                 // Skip node_modules and dist
                 if (entry.name === "node_modules" || entry.name === "dist") {
@@ -35,7 +41,7 @@ export async function findTypeScriptFiles(directory: string): Promise<string[]> 
             }
         }
     }
-    
+
     await walk(directory)
     return files.sort()
 }
@@ -48,7 +54,15 @@ export async function findTypeScriptFiles(directory: string): Promise<string[]> 
  * @returns Absolute path to directory
  */
 export async function resolveSourceDirectory(entry: string): Promise<string> {
-    const stats = await fs.stat(entry)
+    let stats
+    try {
+        stats = await fs.stat(entry)
+    } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+            throw new FileSystemError("Entry path does not exist", entry, error)
+        }
+        throw new FileSystemError("Failed to access entry path", entry, error)
+    }
     if (stats.isFile()) {
         return path.dirname(entry)
     }
