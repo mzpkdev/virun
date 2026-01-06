@@ -1,7 +1,8 @@
-import * as path from "node:path"
 import { builtinModules } from "module"
 import { build as viteBuild, createServer, createViteRuntime, UserConfig, ViteDevServer, LibraryOptions } from "vite"
+import dts from "vite-plugin-dts"
 import type { Configuration, Target } from "./Configuration.js"
+import path from "node:path"
 
 
 const build = async (_target: Target, configuration: Configuration): Promise<void> => {
@@ -11,6 +12,7 @@ const build = async (_target: Target, configuration: Configuration): Promise<voi
         outDir,
         emptyOutDir: true,
         target: "node18",
+        sourcemap: true,
         rollupOptions: {
             external: (id: string) => {
                 if (/^node:.*/.test(id)) {
@@ -29,11 +31,16 @@ const build = async (_target: Target, configuration: Configuration): Promise<voi
 
     if (!preserveModules) {
         await viteBuild({
+            plugins: [ dts({
+                rollupTypes: true,
+                tsconfigPath: path.resolve(process.cwd(), "tsconfig.json")
+            }) ],
             build: {
                 ...build,
                 lib: {
                     entry,
-                    formats: module
+                    formats: module,
+                    fileName: "index"
                 }
             }
         })
@@ -46,6 +53,10 @@ const build = async (_target: Target, configuration: Configuration): Promise<voi
             ? ".mjs"
             : ".js"
         await viteBuild({
+            plugins: [ dts({
+                rollupTypes: false,
+                tsconfigPath: path.resolve(process.cwd(), "tsconfig.json")
+            }) ],
             build: {
                 ...build,
                 emptyOutDir: i == 0,
