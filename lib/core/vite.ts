@@ -67,7 +67,7 @@ const build = async (target: Target, configuration: BuildConfiguration): Promise
     if (!preserveModules) {
         let chunks: RollupOutput["output"]
         try {
-            const [result] = await viteBuild({
+            const [ result ] = await viteBuild({
                 plugins: [ plugin(true) ],
                 build: {
                     ...build,
@@ -94,7 +94,7 @@ const build = async (target: Target, configuration: BuildConfiguration): Promise
                 : ".js"
             let chunks: RollupOutput["output"]
             try {
-                const [result] = await viteBuild({
+                const [ result ] = await viteBuild({
                     plugins: [ plugin(false) ],
                     build: {
                         ...build,
@@ -146,8 +146,51 @@ export type ServeConfiguration = {
 
 const serve = async (target: Target, { entry, port }: ServeConfiguration): Promise<void> => {
     const viteConfiguration: UserConfig = {
+        root: process.cwd(),
+        cacheDir: path.join(process.cwd(), "node_modules/.vite"),
         server: {
-            port
+            port,
+            cors: true,
+            fs: {
+                cachedChecks: true,
+                strict: false
+            },
+            preTransformRequests: true,
+            warmup: {
+                clientFiles: [
+                    "./src/**/*.ts",
+                    "./src/**/*.tsx",
+                    "./index.html"
+                ]
+            },
+            hmr: {
+                overlay: true
+            }
+        },
+        optimizeDeps: {
+            include: [],
+            exclude: [ "vitest", "virun" ],
+            holdUntilCrawlEnd: false,
+            esbuildOptions: {
+                target: "es2022",
+                supported: {
+                    "top-level-await": true
+                }
+            }
+        },
+        esbuild: {
+            target: "es2022",
+            logLevel: "error",
+            keepNames: true,
+            drop: []
+        },
+        build: {
+            target: "es2022",
+            sourcemap: "inline",
+            minify: false
+        },
+        resolve: {
+            extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ]
         }
     }
     let server: ViteDevServer | null = null
