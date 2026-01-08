@@ -8,7 +8,7 @@ import _ from "lodash"
 
 const { port: PORT, host: HOST } = getConfig()
 
-console.log(_.add(1, 1))
+console.log(_.add(7, 7))
 
 const cors = createCorsHandler({ origin: "*", methods: ["GET", "POST"] })
 
@@ -34,4 +34,3 @@ server.listen(PORT, HOST, () => {
     log(`🚀 Server running at http://${HOST}:${PORT}`)
     log(`📅 Started at ${formatDate(new Date())}`)
 })
-

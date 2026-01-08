@@ -144,6 +144,29 @@ export type ServeConfiguration = {
     port?: number
 }
 
+function setupFileWatcher(
+    server: ViteDevServer,
+    onReload: () => Promise<void>
+): void {
+    let reloadTimeout: NodeJS.Timeout | null = null
+    const DEBOUNCE_DELAY = 100 // ms
+
+    server.watcher.on('change', (file: string) => {
+        if (reloadTimeout) {
+            clearTimeout(reloadTimeout)
+        }
+
+        reloadTimeout = setTimeout(async () => {
+            const relativeFile = path.relative(process.cwd(), file)
+            console.log(`\n🔄 File changed: ${relativeFile}`)
+
+            await onReload()
+
+            reloadTimeout = null
+        }, DEBOUNCE_DELAY)
+    })
+}
+
 const serve = async (target: Target, { entry, port }: ServeConfiguration): Promise<void> => {
     const viteConfiguration: UserConfig = {
         root: process.cwd(),
@@ -165,6 +188,10 @@ const serve = async (target: Target, { entry, port }: ServeConfiguration): Promi
             },
             hmr: {
                 overlay: true
+            },
+            watch: {
+                usePolling: true,
+                interval: 100
             }
         },
         optimizeDeps: {
@@ -203,7 +230,27 @@ const serve = async (target: Target, { entry, port }: ServeConfiguration): Promi
         switch (target) {
             case "node":
                 const runtime = await createViteRuntime(server)
-                await runtime.executeUrl(entry)
+
+                const reloadNodeApp = async () => {
+                    try {
+                        runtime.clearCache()
+                        await runtime.executeUrl(entry)
+                        console.log('✅ Ready\n')
+                    } catch (error) {
+                        console.error('❌ Execution failed:', error)
+                        console.log('👀 Watching for changes...\n')
+                    }
+                }
+
+                // Initial execution
+                console.log(`🚀 Starting Node.js application...`)
+                console.log(`📦 Entry: ${path.relative(process.cwd(), entry)}\n`)
+                await reloadNodeApp()
+
+                // Setup file watcher
+                console.log('👀 Watching for file changes...\n')
+                setupFileWatcher(server, reloadNodeApp)
+
                 cleanup = async () => {
                     await runtime.destroy()
                     await server?.close()
@@ -211,8 +258,12 @@ const serve = async (target: Target, { entry, port }: ServeConfiguration): Promi
                 }
                 break
             case "browser":
+                console.log(`\n🌐 Starting browser dev server`)
+                console.log(`📄 Entry: ${path.relative(process.cwd(), entry)}`)
                 await server.listen()
                 server.printUrls()
+                console.log('\n✨ HMR enabled - file changes will auto-reload')
+                console.log('👀 Watching for file changes...\n')
                 break
         }
         process.on("SIGINT", cleanup)
