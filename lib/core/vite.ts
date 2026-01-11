@@ -229,33 +229,7 @@ const serve = async (target: Target, { entry, port }: ServeConfiguration): Promi
         }
         switch (target) {
             case "node":
-                const runtime = await createViteRuntime(server)
-
-                const reloadNodeApp = async () => {
-                    try {
-                        runtime.clearCache()
-                        await runtime.executeUrl(entry)
-                        console.log('✅ Ready\n')
-                    } catch (error) {
-                        console.error('❌ Execution failed:', error)
-                        console.log('👀 Watching for changes...\n')
-                    }
-                }
-
-                // Initial execution
-                console.log(`🚀 Starting Node.js application...`)
-                console.log(`📦 Entry: ${path.relative(process.cwd(), entry)}\n`)
-                await reloadNodeApp()
-
-                // Setup file watcher
-                console.log('👀 Watching for file changes...\n')
-                setupFileWatcher(server, reloadNodeApp)
-
-                cleanup = async () => {
-                    await runtime.destroy()
-                    await server?.close()
-                    process.exit(0)
-                }
+                throw new Error("not implemented")
                 break
             case "browser":
                 console.log(`\n🌐 Starting browser dev server`)
