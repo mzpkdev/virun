@@ -5,6 +5,7 @@ import { findProjectRoot } from "../utils/project.js"
 export type Mode = "build" | "serve"
 export type Target = "node" | "browser"
 export type Module = "es" | "cjs"
+export type Adapter = "http" | "express" | "fastify" | "koa" | "nest"
 
 export type Configuration = {
     root: string
@@ -13,6 +14,7 @@ export type Configuration = {
     module?: Module[]
     outdir?: string
     port?: number
+    adapter?: Adapter
     preserveModules?: boolean
     test?: {
         watch?: boolean
@@ -29,6 +31,7 @@ export namespace Configuration {
         private _entry?: string
         private _outdir?: string
         private _port?: number
+        private _adapter?: Adapter
         private _module?: Module[]
         private _preserveModules?: boolean
 
@@ -48,6 +51,11 @@ export namespace Configuration {
 
         port(value: number): this {
             this._port = value
+            return this
+        }
+
+        adapter(value: Adapter): this {
+            this._adapter = value
             return this
         }
 
@@ -72,6 +80,7 @@ export namespace Configuration {
                     : path.resolve(root, "src/index.ts"),
                 outdir: this._outdir,
                 port: this._port,
+                adapter: this._adapter,
                 preserveModules: this._preserveModules
             }
         }

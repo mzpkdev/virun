@@ -1,4 +1,5 @@
-import { createServer } from "node:http"
+/// <reference types="vite/client" />
+import { createServer, IncomingMessage, ServerResponse } from "node:http"
 import { getConfig } from "./config"
 import { formatDate, getGreeting } from "./utils"
 import { log, logError } from "./logger"
@@ -12,7 +13,7 @@ console.log(_.add(7, 7))
 
 const cors = createCorsHandler({ origin: "*", methods: ["GET", "POST"] })
 
-const server = createServer((req, res) => {
+export const viteNodeApp = (req: IncomingMessage, res: ServerResponse) => {
     cors(req, res, () => {
         if (req.url === "/health") {
             handleHealthCheck(req, res)
@@ -28,9 +29,12 @@ const server = createServer((req, res) => {
             }))
         }
     })
-})
+}
 
-server.listen(PORT, HOST, () => {
-    log(`🚀 Server running at http://${HOST}:${PORT}`)
-    log(`📅 Started at ${formatDate(new Date())}`)
-})
+if (import.meta.env.PROD) {
+    const server = createServer(viteNodeApp)
+    server.listen(PORT, HOST, () => {
+        log(`🚀 Server running at http://${HOST}:${PORT}`)
+        log(`📅 Started at ${formatDate(new Date())}`)
+    })
+}

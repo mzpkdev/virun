@@ -1,9 +1,11 @@
 import { builtinModules } from "module"
 import { build as viteBuild, createServer, createViteRuntime, UserConfig, ViteDevServer } from "vite"
+import { VitePluginNode } from "vite-plugin-node"
 import dts from "vite-plugin-dts"
 import path from "node:path"
+import type { IncomingMessage, ServerResponse } from "node:http"
 import { RollupOutput } from "rollup"
-import { Configuration, Module, Target } from "./Configuration.js"
+import { Adapter, Configuration, Module, Target } from "./Configuration.js"
 import { Metadata } from "./Metadata.js"
 import { BuildError } from "../errors.js"
 
@@ -142,6 +144,7 @@ const build = async (target: Target, configuration: BuildConfiguration): Promise
 export type ServeConfiguration = {
     entry: string
     port?: number
+    adapter?: Adapter
 }
 
 function setupFileWatcher(
@@ -167,7 +170,26 @@ function setupFileWatcher(
     })
 }
 
-const serve = async (target: Target, { entry, port }: ServeConfiguration): Promise<void> => {
+type SupportedFrameworks = "express" | "nest" | "koa" | "fastify"
+type RequestAdapter = (params: { app: any, server: ViteDevServer, req: IncomingMessage, res: ServerResponse, next: () => void }) => void | Promise<void>
+type RequestAdapterOption = SupportedFrameworks | RequestAdapter
+
+const createHttpAdapter = (): RequestAdapter => {
+    return ({ app, req, res }) => {
+        if (typeof app === "function") {
+            app(req, res)
+        }
+    }
+}
+
+const getAdapter = (adapter: Adapter): RequestAdapterOption => {
+    if (adapter === "http") {
+        return createHttpAdapter()
+    }
+    return adapter as SupportedFrameworks
+}
+
+const serve = async (target: Target, { entry, port, adapter }: ServeConfiguration): Promise<void> => {
     const viteConfiguration: UserConfig = {
         root: process.cwd(),
         cacheDir: path.join(process.cwd(), "node_modules/.vite"),
@@ -220,6 +242,18 @@ const serve = async (target: Target, { entry, port }: ServeConfiguration): Promi
             extensions: [ ".ts", ".tsx", ".js", ".jsx", ".json" ]
         }
     }
+
+    if (target === "node") {
+        viteConfiguration.plugins = [
+            ...VitePluginNode({
+                adapter: getAdapter(adapter ?? "http"),
+                appPath: entry,
+                exportName: "viteNodeApp",
+                initAppOnBoot: false
+            })
+        ]
+    }
+
     let server: ViteDevServer | null = null
     try {
         server = await createServer(viteConfiguration)
@@ -229,7 +263,13 @@ const serve = async (target: Target, { entry, port }: ServeConfiguration): Promi
         }
         switch (target) {
             case "node":
-                throw new Error("not implemented")
+                console.log(`\n🚀 Starting Node.js dev server`)
+                console.log(`📄 Entry: ${path.relative(process.cwd(), entry)}`)
+                console.log(`🔌 Adapter: ${adapter ?? "http"}`)
+                await server.listen()
+                server.printUrls()
+                console.log('\n✨ HMR enabled - file changes will auto-reload')
+                console.log('👀 Watching for file changes...\n')
                 break
             case "browser":
                 console.log(`\n🌐 Starting browser dev server`)

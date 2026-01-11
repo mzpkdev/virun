@@ -4,8 +4,9 @@ import { defineOption } from "cmdore"
 export const portOption = defineOption({
     name: "port",
     alias: "p",
-    description: "Dev server port (browser target only)",
-    required: true,
+    description: "Dev server port",
+    required: false,
+    defaultValue: (): number => 3000,
     parse: (value: string): number => {
         const port = parseInt(value, 10)
         if (isNaN(port) || port < 1 || port > 65535) {

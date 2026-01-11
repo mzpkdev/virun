@@ -1,5 +1,6 @@
 import { defineCommand } from "cmdore"
 import { ServeConfiguration, vite } from "../core/vite.js"
+import { adapterOption } from "../options/adapter.js"
 import { entryOption } from "../options/entry.js"
 import { portOption } from "../options/port.js"
 import { targetOption } from "../options/target.js"
@@ -13,13 +14,15 @@ export const serveCommand = defineCommand({
         "--target node",
         "--target browser",
         "--target node --entry src/main.ts",
+        "--target node --adapter express",
         "--target browser --port 3000"
     ],
-    options: [ targetOption, entryOption, portOption ],
-    run: async function* ({ target, entry, port }) {
+    options: [ targetOption, entryOption, portOption, adapterOption ],
+    run: async function* ({ target, entry, port, adapter }) {
         const configuration = await new Configuration.Builder("serve")
             .entry(entry)
             .port(port)
+            .adapter(adapter)
             .build()
         await vite.serve(target, configuration as ServeConfiguration)
         return 0
